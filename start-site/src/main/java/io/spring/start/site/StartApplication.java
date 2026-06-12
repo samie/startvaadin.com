@@ -14,6 +14,8 @@ import io.spring.start.site.container.SimpleDockerServiceResolver;
 import io.spring.start.site.project.ProjectDescriptionCustomizerConfiguration;
 import io.spring.start.site.support.CacheableMavenVersionResolver;
 import io.spring.start.site.support.StartInitializrMetadataUpdateStrategy;
+import io.spring.start.site.ui.InitializrUiService;
+import io.spring.start.site.ui.Preferences;
 import io.spring.start.site.web.HomeController;
 import tools.jackson.databind.json.JsonMapper;
 
@@ -22,6 +24,7 @@ import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpHeaders;
@@ -47,11 +50,6 @@ public class StartApplication {
 	}
 
 	@Bean
-	public HomeController homeController() {
-		return new HomeController();
-	}
-
-	@Bean
 	public StartInitializrMetadataUpdateStrategy initializrMetadataUpdateStrategy(RestClient.Builder restClientBuilder,
 			JsonMapper jsonMapper) {
 		RestClient restClient = restClientBuilder.defaultHeader(HttpHeaders.USER_AGENT, "start.spring.io").build();
@@ -74,6 +72,23 @@ public class StartApplication {
 	@Bean
 	public SimpleDockerServiceResolver dockerServiceResolver() {
 		return new SimpleDockerServiceResolver();
+	}
+
+	@Bean
+	public InitializrUiService initializrUiService(
+			io.spring.initializr.metadata.InitializrMetadataProvider metadataProvider,
+			ApplicationContext applicationContext) {
+		return new InitializrUiService(metadataProvider, applicationContext);
+	}
+
+	@Bean
+	public Preferences preferences(JsonMapper jsonMapper) {
+		return new Preferences(jsonMapper);
+	}
+
+	@Bean
+	public HomeController homeController() {
+		return new HomeController();
 	}
 
 }
