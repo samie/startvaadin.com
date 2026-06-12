@@ -25,7 +25,6 @@
 	</properties>
 
 	<modules>
-		<module>start-client</module>
 		<module>start-site</module>
 		<module>test-support</module>
 	</modules>
@@ -56,11 +55,6 @@
 				<version>${spring-initializr.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
-			</dependency>
-			<dependency>
-				<groupId>io.spring.start</groupId>
-				<artifactId>start-client</artifactId>
-				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>io.spring.start</groupId>
