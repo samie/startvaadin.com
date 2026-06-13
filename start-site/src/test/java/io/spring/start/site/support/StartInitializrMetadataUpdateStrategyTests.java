@@ -4,6 +4,7 @@
 
 package io.spring.start.site.support;
 
+import java.io.IOException;
 import java.util.List;
 
 import io.spring.initializr.generator.test.InitializrMetadataTestBuilder;
@@ -22,8 +23,10 @@ import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withException;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withStatus;
 
 /**
@@ -63,6 +66,22 @@ class StartInitializrMetadataUpdateStrategyTests {
 		assertBootVersion(updatedBootVersions.get(1), "4.1.0", true);
 		assertBootVersion(updatedBootVersions.get(2), "4.0.8 (SNAPSHOT)", false);
 		assertBootVersion(updatedBootVersions.get(3), "4.0.7", false);
+	}
+
+	@Test
+	void transientFetchFailureFallsBackToExistingMetadata() {
+		InitializrMetadata metadata = new InitializrMetadataTestBuilder().addBootVersion("3.5.0", true).build();
+		StartInitializrMetadataUpdateStrategy provider = new StartInitializrMetadataUpdateStrategy(this.restTemplate,
+				jsonMapper);
+		this.mockServer.expect(requestTo(metadata.getConfiguration().getEnv().getSpringBootMetadataUrl()))
+			.andExpect(method(HttpMethod.GET))
+			.andRespond(withException(new IOException("Connection reset")));
+		InitializrMetadata[] updated = new InitializrMetadata[1];
+		assertThatCode(() -> updated[0] = provider.update(metadata)).doesNotThrowAnyException();
+		// The transient failure must not wipe the versions: the existing list is
+		// retained.
+		assertThat(updated[0].getBootVersions().getContent()).singleElement()
+			.satisfies((version) -> assertThat(version.getId()).isEqualTo("3.5.0"));
 	}
 
 	@Test
