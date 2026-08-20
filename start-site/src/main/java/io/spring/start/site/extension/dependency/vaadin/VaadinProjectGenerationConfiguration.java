@@ -49,4 +49,9 @@ class VaadinProjectGenerationConfiguration {
 		return (properties) -> properties.add("vaadin.launch-browser", true);
 	}
 
+	@Bean
+	VaadinAgentConfigProjectContributor vaadinAgentConfigProjectContributor() {
+		return new VaadinAgentConfigProjectContributor();
+	}
+
 }
