@@ -26,4 +26,9 @@ class MavenProjectGenerationConfiguration {
 		return new MavenBuildSystemHelpDocumentCustomizer(description);
 	}
 
+	@Bean
+	PomProvenanceCommentProjectContributor pomProvenanceCommentProjectContributor() {
+		return new PomProvenanceCommentProjectContributor();
+	}
+
 }
