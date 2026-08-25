@@ -108,3 +108,93 @@
 		width: 100%;
 	}
 }
+
+/*
+ * Statistics page (/ui/statistics). A single scrolling column of headline "stat tiles"
+ * plus a few horizontal-bar breakdowns built from plain divs (no chart library). Every
+ * color is a design token so the page follows the day/night toggle automatically.
+ */
+.stats-content {
+	max-width: 52rem;
+	margin: 0 auto;
+	width: 100%;
+}
+
+/* Headline numbers wrap into as many columns as fit; each tile is a tinted surface. */
+.stat-tiles {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--lumo-space-s);
+	margin-bottom: var(--lumo-space-m);
+}
+
+.stat-tile {
+	flex: 1 1 8rem;
+	padding: var(--lumo-space-m);
+	border: 1px solid var(--vaadin-border-color);
+	border-radius: var(--vaadin-radius-l);
+}
+
+.stat-number {
+	font-size: 1.75rem;
+	font-weight: 600;
+	line-height: 1.1;
+	color: var(--aura-accent-color, var(--lumo-primary-color));
+}
+
+.stat-label {
+	margin-top: var(--lumo-space-xs);
+	font-size: 0.8125rem;
+	color: var(--lumo-secondary-text-color);
+}
+
+/* One row per tallied value: label | proportional bar | exact value. */
+.bars {
+	display: flex;
+	flex-direction: column;
+	gap: var(--lumo-space-xs);
+	width: 100%;
+}
+
+.bar-row {
+	display: flex;
+	align-items: center;
+	gap: var(--lumo-space-s);
+}
+
+.bar-label {
+	flex: 0 0 10rem;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	font-size: 0.875rem;
+}
+
+.bar-track {
+	flex: 1 1 auto;
+	height: 0.75rem;
+	border-radius: var(--vaadin-radius-l);
+	background: var(--lumo-contrast-10pct);
+	overflow: hidden;
+}
+
+.bar-fill {
+	height: 100%;
+	border-radius: inherit;
+	background: var(--aura-accent-color, var(--lumo-primary-color));
+}
+
+.bar-value {
+	flex: 0 0 auto;
+	min-width: 5rem;
+	text-align: right;
+	font-size: 0.8125rem;
+	color: var(--lumo-secondary-text-color);
+}
+
+/* Stacked layout: give the label its own line so the bar keeps a usable width. */
+@media (max-width: 44rem) {
+	.bar-label {
+		flex-basis: 6rem;
+	}
+}
