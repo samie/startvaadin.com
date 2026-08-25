@@ -19,8 +19,17 @@ public class StartConfigurationProperties {
 	 */
 	private final MavenVersionResolver mavenVersionResolver = new MavenVersionResolver();
 
+	/**
+	 * Configuration for the usage statistics page.
+	 */
+	private final Statistics statistics = new Statistics();
+
 	public MavenVersionResolver getMavenVersionResolver() {
 		return this.mavenVersionResolver;
+	}
+
+	public Statistics getStatistics() {
+		return this.statistics;
 	}
 
 	public static class MavenVersionResolver {
@@ -37,6 +46,38 @@ public class StartConfigurationProperties {
 
 		public void setCacheDirectory(String cacheDirectory) {
 			this.cacheDirectory = cacheDirectory;
+		}
+
+	}
+
+	public static class Statistics {
+
+		/**
+		 * File used to persist usage counters so they survive restarts. If not set,
+		 * counters are kept in memory only and reset on restart. Production deployments
+		 * should point this at durable storage.
+		 */
+		private String file;
+
+		/**
+		 * How often (in seconds) the statistics page polls for fresh numbers.
+		 */
+		private int pollIntervalSeconds = 10;
+
+		public String getFile() {
+			return this.file;
+		}
+
+		public void setFile(String file) {
+			this.file = file;
+		}
+
+		public int getPollIntervalSeconds() {
+			return this.pollIntervalSeconds;
+		}
+
+		public void setPollIntervalSeconds(int pollIntervalSeconds) {
+			this.pollIntervalSeconds = pollIntervalSeconds;
 		}
 
 	}
