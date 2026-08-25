@@ -152,9 +152,7 @@ public class MainView extends AppLayout {
 	}
 
 	private void applyTheme(String theme) {
-		// Dark-first: a dev tool defaults to dark. Only an explicit saved "light"
-		// preference opts out; unset/blank/"dark" all resolve to dark.
-		setDarkMode(!"light".equalsIgnoreCase(theme));
+		setDarkMode(ThemeSupport.isDark(theme));
 	}
 
 	private void recordHistory() {
@@ -244,7 +242,10 @@ public class MainView extends AppLayout {
 		history.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
 		Button favorites = new Button("Favorites", new Icon(VaadinIcon.STAR), (event) -> openFavoritesDialog());
 		favorites.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-		VerticalLayout drawer = new VerticalLayout(history, favorites);
+		Button statistics = new Button("Statistics", new Icon(VaadinIcon.CHART),
+				(event) -> getUI().ifPresent((ui) -> ui.navigate(StatisticsView.class)));
+		statistics.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+		VerticalLayout drawer = new VerticalLayout(history, favorites, statistics);
 		drawer.setPadding(true);
 		drawer.setSpacing(true);
 		addToDrawer(drawer);
@@ -308,7 +309,7 @@ public class MainView extends AppLayout {
 		String label = dark ? "Switch to light mode" : "Switch to dark mode";
 		this.themeToggle.setAriaLabel(label);
 		this.themeToggle.setTooltipText(label);
-		getElement().executeJs("document.documentElement.style.colorScheme = $0;", dark ? "dark" : "light");
+		ThemeSupport.applyColorScheme(this, dark);
 	}
 
 	public InitializrFormModel getModel() {

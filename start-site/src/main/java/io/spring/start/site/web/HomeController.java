@@ -28,4 +28,11 @@ public class HomeController {
 		return "redirect:/ui/";
 	}
 
+	// Friendly aliases for the statistics page. Unlike "/", these paths are not part of
+	// Initializr's CLI/HAL contract, so they redirect unconditionally to the Vaadin view.
+	@GetMapping({ "/stats", "/stats/", "/statistics", "/statistics/" })
+	public String statistics() {
+		return "redirect:/ui/statistics";
+	}
+
 }

@@ -11,6 +11,7 @@ import java.nio.file.Path;
 import io.spring.initializr.versionresolver.MavenVersionResolver;
 import io.spring.start.site.container.SimpleDockerServiceResolver;
 import io.spring.start.site.project.ProjectDescriptionCustomizerConfiguration;
+import io.spring.start.site.stats.StatisticsService;
 import io.spring.start.site.support.CacheableMavenVersionResolver;
 import io.spring.start.site.support.StartInitializrMetadataUpdateStrategy;
 import io.spring.start.site.ui.InitializrUiService;
@@ -85,6 +86,11 @@ public class StartApplication {
 	@Bean
 	public Preferences preferences(JsonMapper jsonMapper) {
 		return new Preferences(jsonMapper);
+	}
+
+	@Bean
+	public StatisticsService statisticsService(JsonMapper jsonMapper, StartConfigurationProperties properties) {
+		return new StatisticsService(jsonMapper, properties.getStatistics().getFile());
 	}
 
 	@Bean
