@@ -4,5 +4,9 @@
       "type": "http",
       "url": "https://mcp.vaadin.com/docs"
     }
+    "vaadin-direcotry": {
+      "type": "http",
+      "url": "https://vaadin.com/directory/mcp"
+    }
   }
 }
