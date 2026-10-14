@@ -44,7 +44,7 @@ class VaadinAgentConfigProjectContributorTests extends AbstractExtensionTests {
 
 	@Test
 	void agentConfigIsContributedWithVaadin() {
-		ProjectRequest request = createProjectRequest(SupportedBootVersion.V4_0, "vaadin");
+		ProjectRequest request = createProjectRequest(SupportedBootVersion.V4_1, "vaadin");
 		Path project = generateProject(request).getProjectDirectory();
 		assertThat(project.resolve(".mcp.json")).isRegularFile();
 		assertThat(project.resolve(".codex/config.toml")).isRegularFile();
@@ -67,7 +67,7 @@ class VaadinAgentConfigProjectContributorTests extends AbstractExtensionTests {
 
 	@Test
 	void skillCopiesAreIdentical() throws Exception {
-		ProjectRequest request = createProjectRequest(SupportedBootVersion.V4_0, "vaadin");
+		ProjectRequest request = createProjectRequest(SupportedBootVersion.V4_1, "vaadin");
 		Path project = generateProject(request).getProjectDirectory();
 		Path agentsSkills = project.resolve(".agents/skills");
 		Path claudeSkills = project.resolve(".claude/skills");
