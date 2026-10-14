@@ -73,8 +73,10 @@ public class ProjectFormSection extends VerticalLayout {
 		javaVersion.addClassName("mono");
 		List<DefaultMetadataElement> formats = this.service.getConfigurationFileFormats();
 		FormLayout options = responsiveForm(packaging, javaVersion);
+		RadioButtonGroup<String> configFile = null;
 		if (!formats.isEmpty()) {
-			options.add(radioGroup("Config file", formats));
+			configFile = radioGroup("Config file", formats);
+			options.add(configFile);
 		}
 		add(options);
 
@@ -92,6 +94,10 @@ public class ProjectFormSection extends VerticalLayout {
 		this.binder.forField(packaging).bind(InitializrFormModel::getPackaging, InitializrFormModel::setPackaging);
 		this.binder.forField(javaVersion)
 			.bind(InitializrFormModel::getJavaVersion, InitializrFormModel::setJavaVersion);
+		if (configFile != null) {
+			this.binder.forField(configFile)
+				.bind(InitializrFormModel::getConfigurationFileFormat, InitializrFormModel::setConfigurationFileFormat);
+		}
 
 		// Only auto-derive on real user edits; programmatic loads (default form,
 		// bookmark/history via readBean) carry their own package name and must not be
