@@ -2,8 +2,9 @@
 
 Guidance for OpenAI Codex when working on this generated Vaadin project.
 
-- Use the `project-guide` skill when developing, testing, or modifying this
-  application.
+- Use the available Vaadin skills under `.agents/skills` (`aura-theme`,
+  `vaadin-frontend-design`, `vaadin-form-layout`) when designing UIs, theming, or
+  building forms.
 - Use the `vaadin` MCP server for Vaadin documentation, APIs, components, styling,
   and version information instead of guessing about Vaadin APIs or framework
   behavior.
