@@ -1,9 +1,9 @@
-= start.spring.io image:https://badges.gitter.im/spring-io/initializr.svg[link="https://gitter.im/spring-io/initializr?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge"]
-:library: https://github.com/spring-io/initializr
+= startvaadin.com 
 
-This repository configures a {library}[Spring Initializr] instance with a custom UI
-running at https://pro.startvaadin.com/. The UI is a server-side
-https://vaadin.com/[Vaadin Flow] application hosted inside `start-site`.
+This repository configures a {library}[Spring Initializr] instance with a custom 
+Vaadin UI running at https://pro.startvaadin.com/. The UI is a server-side
+https://vaadin.com/[Vaadin] application hosted inside `start-site`.
+
 The following modules are available:
 
 * `start-site`: server infrastructure, metadata configuration, and the Vaadin UI
@@ -13,7 +13,6 @@ The following modules are available:
 == Using
 There is a link:USING.adoc[dedicated page] that describes how you can interact with the
 service.
-
 
 
 [[build]]
