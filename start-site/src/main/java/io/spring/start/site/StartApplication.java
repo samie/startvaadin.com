@@ -16,7 +16,8 @@ import io.spring.start.site.support.CacheableMavenVersionResolver;
 import io.spring.start.site.support.StartInitializrMetadataUpdateStrategy;
 import io.spring.start.site.ui.InitializrUiService;
 import io.spring.start.site.ui.Preferences;
-import io.spring.start.site.web.HomeController;
+import io.spring.start.site.ui.SocialMetaInitListener;
+import io.spring.start.site.web.RootForwardingFilter;
 import tools.jackson.databind.json.JsonMapper;
 
 import org.springframework.boot.SpringApplication;
@@ -24,10 +25,12 @@ import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.restclient.RestTemplateBuilder;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.core.Ordered;
 import org.springframework.http.HttpHeaders;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.util.StringUtils;
@@ -94,8 +97,17 @@ public class StartApplication {
 	}
 
 	@Bean
-	public HomeController homeController() {
-		return new HomeController();
+	public FilterRegistrationBean<RootForwardingFilter> rootForwardingFilter() {
+		FilterRegistrationBean<RootForwardingFilter> registration = new FilterRegistrationBean<>(
+				new RootForwardingFilter());
+		registration.addUrlPatterns("/*");
+		registration.setOrder(Ordered.HIGHEST_PRECEDENCE);
+		return registration;
+	}
+
+	@Bean
+	public SocialMetaInitListener socialMetaInitListener(StartConfigurationProperties properties) {
+		return new SocialMetaInitListener(properties);
 	}
 
 }

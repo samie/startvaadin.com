@@ -42,6 +42,24 @@
 }
 
 /*
+ * Navbar headline that echoes the social/SEO description (see Branding.TAGLINE). Kept
+ * subtle next to the brand title and dropped below the main breakpoint so it never
+ * crowds the toolbar on small screens.
+ */
+.app-tagline {
+	align-self: center;
+	margin-left: var(--lumo-space-m);
+	font-size: 0.8125rem;
+	color: var(--vaadin-text-color-secondary);
+}
+
+@media (max-width: 44rem) {
+	.app-tagline {
+		display: none;
+	}
+}
+
+/*
  * Monospace utility for technical/code-like data (versions, coordinates).
  * Custom properties inherit into a component's internal parts, so retargeting
  * --aura-font-family on the host switches the field/label font without ::part.
@@ -110,7 +128,7 @@
 }
 
 /*
- * Statistics page (/ui/statistics). A single scrolling column of headline "stat tiles"
+ * Statistics page (/statistics). A single scrolling column of headline "stat tiles"
  * plus a few horizontal-bar breakdowns built from plain divs (no chart library). Every
  * color is a design token so the page follows the day/night toggle automatically.
  */

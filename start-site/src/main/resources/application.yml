@@ -20,6 +20,8 @@ server:
     mime-types: application/json,text/css,text/html
     min-response-size: 2048
   forward-headers-strategy: native
+  mime-mappings:
+    webmanifest: application/manifest+json
 
 spring:
   cache:
@@ -39,10 +41,12 @@ spring:
     error:
       include-message: always
 
-vaadin:
-  # Keep "/" free for Initializr's CLI/HAL endpoints; the Vaadin UI is
-  # mounted at /ui/* and HomeController forwards browser requests there.
-  url-mapping: /ui/*
+# Vaadin intentionally has no "url-mapping": it uses the default root mapping (/*), so the
+# UI is served directly at "/". Initializr's own controllers still own "/" for the CLI/HAL
+# metadata contract (text/plain + *+json) and keep their discrete endpoints (/starter.zip,
+# /metadata/**, /pom.xml, ...) by Spring MVC's higher handler precedence. RootForwardingFilter
+# routes the browser's HTML page load and the Flow framework requests (?v-r=...) at "/" to the
+# Vaadin servlet; the metadata requests fall through to Initializr.
 
 initializr:
   name:
