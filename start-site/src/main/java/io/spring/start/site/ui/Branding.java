@@ -4,6 +4,8 @@
 
 package io.spring.start.site.ui;
 
+import java.net.URI;
+
 /**
  * Shared branding and social/SEO copy. Kept in one place so the page title, the visible
  * headline and the social metadata ({@link SocialMetaInitListener}) stay in sync.
@@ -28,7 +30,23 @@ final class Branding {
 	/** Alternative text for the social card image. */
 	static final String IMAGE_ALT = NAME;
 
+	/** Vaadin quickstart tutorial, linked from the drawer and the navbar. */
+	static final String TUTORIAL_BASE_URL = "https://vaadin.com/quickstart";
+
 	private Branding() {
+	}
+
+	/**
+	 * Builds the tutorial link tagged with the site's own public host as
+	 * {@code utm_source}, so analytics reflect the real URL the visitor was on rather
+	 * than a guessed/hardcoded one.
+	 * @param publicUrl the deployment's public base URL (see
+	 * {@code StartConfigurationProperties#getPublicUrl()})
+	 * @return the tutorial URL with {@code utm_source} set to the public URL's host
+	 */
+	static String tutorialUrl(String publicUrl) {
+		String host = URI.create(publicUrl).getHost();
+		return TUTORIAL_BASE_URL + "?utm_source=" + host;
 	}
 
 }
