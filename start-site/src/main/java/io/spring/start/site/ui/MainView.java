@@ -22,12 +22,12 @@ import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.html.Main;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
@@ -315,7 +315,7 @@ public class MainView extends AppLayout {
 		// rather than floating directly under the header (gh #5).
 		rightColumn.setFlexGrow(1, this.dependenciesSection);
 		rightColumn.setFlexGrow(0, this.actionsBar);
-		FlexLayout content = new FlexLayout(formColumn, rightColumn);
+		Main content = new Main(formColumn, rightColumn);
 		content.addClassName("main-content");
 		return content;
 	}
