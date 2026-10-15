@@ -13,6 +13,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.SvgIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -60,10 +61,15 @@ public class DependencyPickerDialog extends Dialog {
 		this.list = new VirtualList<>();
 		this.list.setSizeFull();
 		this.list.setRenderer(new com.vaadin.flow.data.renderer.ComponentRenderer<>(this::renderRow));
+		this.list.getStyle()
+			.set("background", "var(--vaadin-background-container)")
+			.set("padding", "var(--vaadin-padding-s)")
+			.set("border-radius", "var(--vaadin-radius-l)")
+			.set("box-sizing", "border-box");
 		this.emptyState = new Span("No matching dependencies");
 		this.emptyState.getStyle()
-			.set("color", "var(--lumo-secondary-text-color)")
-			.set("padding", "var(--lumo-space-m)");
+			.set("color", "var(--vaadin-text-color-secondary)")
+			.set("padding", "var(--vaadin-padding-m)");
 		this.emptyState.setVisible(false);
 		VerticalLayout body = new VerticalLayout(this.search, this.list, this.emptyState);
 		body.setSizeFull();
@@ -117,6 +123,7 @@ public class DependencyPickerDialog extends Dialog {
 	private com.vaadin.flow.component.Component renderRow(Row row) {
 		Dependency dependency = row.entry().dependency();
 		boolean valid = row.entry().valid();
+		SvgIcon icon = VendorIcons.icon(dependency);
 		Span name = new Span(dependency.getName());
 		name.getStyle().set("font-weight", "600");
 		Span groupLabel = new Span(row.groupName());
@@ -127,24 +134,13 @@ public class DependencyPickerDialog extends Dialog {
 		header.setAlignItems(FlexComponent.Alignment.CENTER);
 		Span description = new Span((dependency.getDescription() != null) ? dependency.getDescription() : "");
 		description.getStyle()
-			.set("color", "var(--lumo-secondary-text-color)")
-			.set("font-size", "var(--lumo-font-size-s)");
-		VerticalLayout content = new VerticalLayout(header, description);
-		content.setPadding(false);
-		content.setSpacing(false);
-		content.getStyle().set("padding", "var(--lumo-space-s) var(--lumo-space-m)");
-		if (!valid) {
-			content.getStyle().set("opacity", "0.55").set("cursor", "not-allowed");
-			Span invalid = new Span(row.entry().invalidMessage());
-			invalid.getStyle()
-				.set("color", "var(--lumo-error-text-color)")
-				.set("font-size", "var(--lumo-font-size-xs)");
-			content.add(invalid);
-		}
+			.set("color", "var(--vaadin-text-color-secondary)")
+			.set("font-size", "var(--aura-font-size-s)");
+		VerticalLayout text = new VerticalLayout(header, description);
+		text.setPadding(false);
+		text.setSpacing(false);
+		text.getStyle().set("flex-grow", "1");
 		boolean selected = this.model.getDependencies().contains(dependency.getId());
-		if (valid && selected) {
-			content.getStyle().set("background", "var(--lumo-primary-color-10pct)");
-		}
 		Button add = new Button(selected ? "Remove" : "Add", (event) -> {
 			this.onToggle.accept(dependency.getId());
 			// Keep the user's current query in effect after a toggle rather than
@@ -153,7 +149,24 @@ public class DependencyPickerDialog extends Dialog {
 		});
 		add.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE, ButtonVariant.LUMO_SMALL);
 		add.setEnabled(valid);
-		header.add(add);
+		HorizontalLayout content = new HorizontalLayout(icon, text, add);
+		content.addClassName("aura-surface");
+		content.setWidthFull();
+		content.setAlignItems(FlexComponent.Alignment.CENTER);
+		content.getStyle()
+			.set("box-sizing", "border-box")
+			.set("padding", "var(--vaadin-padding-s) var(--vaadin-padding-m)")
+			.set("margin", "var(--vaadin-gap-xs) 0")
+			.set("border-radius", "var(--vaadin-radius-m)");
+		if (!valid) {
+			content.getStyle().set("opacity", "0.55").set("cursor", "not-allowed");
+			Span invalid = new Span(row.entry().invalidMessage());
+			invalid.getStyle().set("color", "var(--aura-red-text)").set("font-size", "var(--aura-font-size-xs)");
+			text.add(invalid);
+		}
+		if (valid && selected) {
+			content.getStyle().set("background", "var(--aura-accent-surface)");
+		}
 		return content;
 	}
 
