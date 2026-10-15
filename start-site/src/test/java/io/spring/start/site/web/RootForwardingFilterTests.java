@@ -8,6 +8,8 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletContext;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -55,6 +57,24 @@ class RootForwardingFilterTests {
 		MockHttpServletRequest request = rootRequest("POST");
 		request.addParameter("v-r", "uidl");
 		assertForwardedToVaadin(request);
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = { "Slackbot-LinkExpanding 1.0 (+https://api.slack.com/robots)", "Twitterbot/1.0",
+			"facebookexternalhit/1.1", "LinkedInBot/1.0", "Mozilla/5.0 (compatible; Googlebot/2.1)" })
+	void socialCrawlerIsForwardedToVaadin(String userAgent) throws Exception {
+		MockHttpServletRequest request = rootRequest("GET");
+		request.addHeader(HttpHeaders.USER_AGENT, userAgent);
+		request.addHeader(HttpHeaders.ACCEPT, MediaType.ALL_VALUE);
+		assertForwardedToVaadin(request);
+	}
+
+	@Test
+	void socialCrawlerOnNonRootPathFallsThrough() throws Exception {
+		MockHttpServletRequest request = new MockHttpServletRequest(context(), "GET", "/starter.zip");
+		request.addHeader(HttpHeaders.USER_AGENT, "Slackbot-LinkExpanding 1.0");
+		request.addHeader(HttpHeaders.ACCEPT, MediaType.ALL_VALUE);
+		assertFallsThrough(request);
 	}
 
 	@Test
