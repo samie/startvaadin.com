@@ -17,6 +17,7 @@
 
 	<properties>
 		<vaadin.version>25.2.3</vaadin.version>
+		<simple-icons.version>16.2.0</simple-icons.version>
 	</properties>
 
 	<dependencyManagement>
@@ -119,11 +120,102 @@
 			<artifactId>vaadin-testbench-unit-junit5</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.webjars.npm</groupId>
+			<artifactId>simple-icons</artifactId>
+			<version>${simple-icons.version}</version>
+			<scope>provided</scope>
+		</dependency>
 	</dependencies>
 
 	<build>
 		<finalName>start-site</finalName>
+		<resources>
+			<resource>
+				<directory>${project.basedir}/src/main/resources</directory>
+			</resource>
+			<resource>
+				<!-- Curated vendor icons unpacked from simple-icons by the
+					 maven-dependency-plugin execution below; flattened here so they
+					 land on the classpath as META-INF/resources/images/vendors/*.svg. -->
+				<directory>${project.build.directory}/vendor-icons-unpacked/META-INF/resources/webjars/simple-icons/${simple-icons.version}/icons</directory>
+				<targetPath>META-INF/resources/images/vendors</targetPath>
+				<includes>
+					<include>*.svg</include>
+				</includes>
+			</resource>
+		</resources>
 		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>unpack-vendor-icons</id>
+						<phase>generate-resources</phase>
+						<goals>
+							<goal>unpack</goal>
+						</goals>
+						<configuration>
+							<artifactItems>
+								<artifactItem>
+									<groupId>org.webjars.npm</groupId>
+									<artifactId>simple-icons</artifactId>
+									<version>${simple-icons.version}</version>
+									<outputDirectory>${project.build.directory}/vendor-icons-unpacked</outputDirectory>
+									<includes>
+										META-INF/resources/webjars/simple-icons/${simple-icons.version}/icons/vaadin.svg,
+										META-INF/resources/webjars/simple-icons/${simple-icons.version}/icons/postgresql.svg,
+										META-INF/resources/webjars/simple-icons/${simple-icons.version}/icons/mysql.svg,
+										META-INF/resources/webjars/simple-icons/${simple-icons.version}/icons/mariadb.svg,
+										META-INF/resources/webjars/simple-icons/${simple-icons.version}/icons/mongodb.svg,
+										META-INF/resources/webjars/simple-icons/${simple-icons.version}/icons/redis.svg,
+										META-INF/resources/webjars/simple-icons/${simple-icons.version}/icons/neo4j.svg,
+										META-INF/resources/webjars/simple-icons/${simple-icons.version}/icons/apachecassandra.svg,
+										META-INF/resources/webjars/simple-icons/${simple-icons.version}/icons/apachekafka.svg,
+										META-INF/resources/webjars/simple-icons/${simple-icons.version}/icons/elasticsearch.svg,
+										META-INF/resources/webjars/simple-icons/${simple-icons.version}/icons/rabbitmq.svg,
+										META-INF/resources/webjars/simple-icons/${simple-icons.version}/icons/openjdk.svg,
+										META-INF/resources/webjars/simple-icons/${simple-icons.version}/icons/docker.svg,
+										META-INF/resources/webjars/simple-icons/${simple-icons.version}/icons/graphql.svg,
+										META-INF/resources/webjars/simple-icons/${simple-icons.version}/icons/springsecurity.svg,
+										META-INF/resources/webjars/simple-icons/${simple-icons.version}/icons/spring.svg,
+										META-INF/resources/webjars/simple-icons/${simple-icons.version}/icons/okta.svg,
+										META-INF/resources/webjars/simple-icons/${simple-icons.version}/icons/thymeleaf.svg,
+										META-INF/resources/webjars/simple-icons/${simple-icons.version}/icons/apachefreemarker.svg,
+										META-INF/resources/webjars/simple-icons/${simple-icons.version}/icons/apachegroovy.svg,
+										META-INF/resources/webjars/simple-icons/${simple-icons.version}/icons/kotlin.svg,
+										META-INF/resources/webjars/simple-icons/${simple-icons.version}/icons/sqlite.svg,
+										META-INF/resources/webjars/simple-icons/${simple-icons.version}/icons/couchbase.svg,
+										META-INF/resources/webjars/simple-icons/${simple-icons.version}/icons/apachepulsar.svg,
+										META-INF/resources/webjars/simple-icons/${simple-icons.version}/icons/consul.svg,
+										META-INF/resources/webjars/simple-icons/${simple-icons.version}/icons/vault.svg,
+										META-INF/resources/webjars/simple-icons/${simple-icons.version}/icons/netflix.svg,
+										META-INF/resources/webjars/simple-icons/${simple-icons.version}/icons/googlecloud.svg,
+										META-INF/resources/webjars/simple-icons/${simple-icons.version}/icons/googlepubsub.svg,
+										META-INF/resources/webjars/simple-icons/${simple-icons.version}/icons/googlecloudstorage.svg,
+										META-INF/resources/webjars/simple-icons/${simple-icons.version}/icons/opensearch.svg,
+										META-INF/resources/webjars/simple-icons/${simple-icons.version}/icons/swagger.svg,
+										META-INF/resources/webjars/simple-icons/${simple-icons.version}/icons/sentry.svg,
+										META-INF/resources/webjars/simple-icons/${simple-icons.version}/icons/datadog.svg,
+										META-INF/resources/webjars/simple-icons/${simple-icons.version}/icons/dynatrace.svg,
+										META-INF/resources/webjars/simple-icons/${simple-icons.version}/icons/influxdb.svg,
+										META-INF/resources/webjars/simple-icons/${simple-icons.version}/icons/newrelic.svg,
+										META-INF/resources/webjars/simple-icons/${simple-icons.version}/icons/prometheus.svg,
+										META-INF/resources/webjars/simple-icons/${simple-icons.version}/icons/opentelemetry.svg,
+										META-INF/resources/webjars/simple-icons/${simple-icons.version}/icons/anthropic.svg,
+										META-INF/resources/webjars/simple-icons/${simple-icons.version}/icons/mistralai.svg,
+										META-INF/resources/webjars/simple-icons/${simple-icons.version}/icons/ollama.svg,
+										META-INF/resources/webjars/simple-icons/${simple-icons.version}/icons/googlegemini.svg,
+										META-INF/resources/webjars/simple-icons/${simple-icons.version}/icons/elevenlabs.svg,
+										META-INF/resources/webjars/simple-icons/${simple-icons.version}/icons/milvus.svg
+									</includes>
+								</artifactItem>
+							</artifactItems>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 			<plugin>
 				<groupId>io.spring.javaformat</groupId>
 				<artifactId>spring-javaformat-maven-plugin</artifactId>

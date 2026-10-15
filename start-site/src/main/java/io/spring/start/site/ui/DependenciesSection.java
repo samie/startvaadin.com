@@ -10,10 +10,12 @@ import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.SvgIcon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import io.spring.initializr.metadata.Dependency;
 
 /**
  * Right column header: "Add dependencies" button + chip list of selected dependencies.
@@ -71,7 +73,7 @@ public class DependenciesSection extends VerticalLayout {
 		for (String id : this.model.getDependencies()) {
 			this.service.getDependency(id).ifPresent((dependency) -> {
 				String invalid = this.service.incompatibilityHint(dependency, this.model.getBootVersion());
-				this.chipList.add(chip(dependency.getId(), dependency.getName(), dependency.getDescription(), invalid));
+				this.chipList.add(chip(dependency, invalid));
 			});
 		}
 		this.dialog.reload();
@@ -87,8 +89,12 @@ public class DependenciesSection extends VerticalLayout {
 		refresh();
 	}
 
-	private HorizontalLayout chip(String id, String name, String description, String invalidMessage) {
+	private HorizontalLayout chip(Dependency dependency, String invalidMessage) {
+		String id = dependency.getId();
+		String name = dependency.getName();
+		String description = dependency.getDescription();
 		boolean invalid = (invalidMessage != null);
+		SvgIcon icon = VendorIcons.icon(dependency);
 		Span title = new Span(name);
 		title.getStyle().set("font-weight", "600");
 		Span detail = new Span(invalid ? invalidMessage : ((description != null) ? description : ""));
@@ -102,7 +108,7 @@ public class DependenciesSection extends VerticalLayout {
 		remove.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE, ButtonVariant.LUMO_SMALL);
 		remove.setAriaLabel("Remove " + name);
 		remove.setTooltipText("Remove " + name);
-		HorizontalLayout chip = new HorizontalLayout(text, remove);
+		HorizontalLayout chip = new HorizontalLayout(icon, text, remove);
 		chip.setWidthFull();
 		chip.setAlignItems(FlexComponent.Alignment.CENTER);
 		chip.getStyle()
