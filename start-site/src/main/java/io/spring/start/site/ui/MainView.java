@@ -25,6 +25,7 @@ import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Main;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.SvgIcon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
@@ -266,9 +267,19 @@ public class MainView extends AppLayout {
 		Button statistics = new Button("Statistics", new Icon(VaadinIcon.CHART),
 				(event) -> getUI().ifPresent((ui) -> ui.navigate(StatisticsView.class)));
 		statistics.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+		SvgIcon githubIcon = new SvgIcon("/images/vendors/github.svg");
+		githubIcon.addClassName("dependency-icon");
+		githubIcon.getStyle().set("--vaadin-icon-size", "var(--lumo-icon-size-m, 24px)");
+		Button repository = new Button("GitHub repo", githubIcon,
+				(event) -> getUI().ifPresent((ui) -> ui.getPage().open(Branding.REPOSITORY_URL, "_blank")));
+		repository.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
 		VerticalLayout drawer = new VerticalLayout(tutorial, history, favorites, statistics);
 		drawer.setPadding(true);
 		drawer.setSpacing(true);
+		drawer.setHeightFull();
+		// Anchor the repository link to the bottom of the drawer.
+		repository.getStyle().set("margin-top", "auto");
+		drawer.add(repository);
 		addToDrawer(drawer);
 	}
 
