@@ -251,3 +251,14 @@
 		flex: 0 0 100%;
 	}
 }
+
+/*
+ * Vendor icon next to a dependency's name (chip list + picker dialog). SvgIcon inlines
+ * the SVG and tracks the host's `color`, so this needs no fill rule to stay correct
+ * across light/dark (see VendorIcons).
+ */
+.dependency-icon {
+	--vaadin-icon-size: 36px;
+	flex-shrink: 0;
+	color: var(--lumo-secondary-text-color);
+}
