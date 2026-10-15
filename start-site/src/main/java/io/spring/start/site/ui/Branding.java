@@ -33,6 +33,9 @@ final class Branding {
 	/** Vaadin quickstart tutorial, linked from the drawer and the navbar. */
 	static final String TUTORIAL_BASE_URL = "https://vaadin.com/quickstart";
 
+	/** Source repository for this site, linked from the drawer. */
+	static final String REPOSITORY_URL = "https://github.com/samie/startvaadin.com";
+
 	private Branding() {
 	}
 
