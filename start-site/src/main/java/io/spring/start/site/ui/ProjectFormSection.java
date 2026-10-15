@@ -164,6 +164,7 @@ public class ProjectFormSection extends VerticalLayout {
 	private RadioButtonGroup<String> radioGroup(String label, List<DefaultMetadataElement> elements) {
 		RadioButtonGroup<String> group = new RadioButtonGroup<>();
 		group.setLabel(label);
+		group.setAriaLabel(label);
 		group.setItems(elements.stream().map(DefaultMetadataElement::getId).toList());
 		group.setItemLabelGenerator((id) -> elements.stream()
 			.filter((e) -> e.getId().equals(id))
