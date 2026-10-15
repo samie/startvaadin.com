@@ -241,7 +241,7 @@
 .example-cards {
 	display: flex;
 	flex-wrap: wrap;
-	gap: var(--lumo-space-s);
+	gap: var(--vaadin-gap-m, 1rem);
 	width: 100%;
 }
 
