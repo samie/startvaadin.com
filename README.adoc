@@ -4,6 +4,8 @@ This repository configures a {library}[Spring Initializr] instance with a custom
 Vaadin UI running at https://pro.startvaadin.com/. The UI is a server-side
 https://vaadin.com/[Vaadin] application hosted inside `start-site`.
 
+image::startvaadincom-screenshot.png[Screenshot of startvaadin.com,link="https://pro.startvaadin.com/"]
+
 The following modules are available:
 
 * `start-site`: server infrastructure, metadata configuration, and the Vaadin UI
