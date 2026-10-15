@@ -1,8 +1,8 @@
 // @ts-check
 const { expect } = require('@playwright/test');
 
-/** Path the Vaadin UI is mounted at (see vaadin.url-mapping = /ui/*). */
-const UI_PATH = '/ui/';
+/** Path the Vaadin UI is mounted at (root mapping; see RootForwardingFilter). */
+const UI_PATH = '/';
 
 /**
  * Navigate to the Vaadin UI and wait until it has bootstrapped (the primary

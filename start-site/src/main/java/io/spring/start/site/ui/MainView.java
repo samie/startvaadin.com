@@ -21,6 +21,7 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
@@ -44,7 +45,7 @@ import io.spring.start.site.ui.examples.ExampleCatalog;
  * @author Vaadin UI Migration
  */
 @Route("")
-@PageTitle("Vaadin Initializr")
+@PageTitle(Branding.TITLE)
 public class MainView extends AppLayout {
 
 	private final InitializrUiService service;
@@ -265,13 +266,17 @@ public class MainView extends AppLayout {
 
 	private void buildNavbar() {
 		DrawerToggle toggle = new DrawerToggle();
-		H1 title = new H1("Vaadin Initializr");
+		H1 title = new H1(Branding.NAME);
 		title.getStyle().set("font-size", "1.125rem").set("margin", "0");
+		// Visible headline that mirrors the social/SEO description; hidden on narrow
+		// screens via the .app-tagline rules in styles/app.css.
+		Span tagline = new Span(Branding.TAGLINE);
+		tagline.addClassName("app-tagline");
 		HorizontalLayout right = new HorizontalLayout(this.themeToggle);
 		right.setSpacing(true);
 		right.setAlignItems(FlexComponent.Alignment.CENTER);
 		right.getStyle().set("margin-left", "auto").set("margin-right", "var(--vaadin-padding-l, 1rem)");
-		addToNavbar(toggle, title, right);
+		addToNavbar(toggle, title, tagline, right);
 	}
 
 	/**

@@ -24,12 +24,26 @@ public class StartConfigurationProperties {
 	 */
 	private final Statistics statistics = new Statistics();
 
+	/**
+	 * Public base URL of the deployed site, used to build absolute canonical, Open Graph
+	 * and Twitter URLs for social sharing and SEO. A trailing slash is ignored.
+	 */
+	private String publicUrl = "https://pro.startvaadin.com";
+
 	public MavenVersionResolver getMavenVersionResolver() {
 		return this.mavenVersionResolver;
 	}
 
 	public Statistics getStatistics() {
 		return this.statistics;
+	}
+
+	public String getPublicUrl() {
+		return this.publicUrl;
+	}
+
+	public void setPublicUrl(String publicUrl) {
+		this.publicUrl = publicUrl;
 	}
 
 	public static class MavenVersionResolver {
