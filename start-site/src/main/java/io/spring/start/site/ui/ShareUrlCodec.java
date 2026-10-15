@@ -43,6 +43,7 @@ public final class ShareUrlCodec {
 		put(params, "packaging", model.getPackaging());
 		put(params, "javaVersion", model.getJavaVersion());
 		put(params, "configurationFileFormat", model.getConfigurationFileFormat());
+		put(params, "exampleId", model.getExampleId());
 		if (model.getDependencies() != null && !model.getDependencies().isEmpty()) {
 			params.put("dependencies", String.join(",", model.getDependencies()));
 		}
@@ -107,6 +108,7 @@ public final class ShareUrlCodec {
 		applyIfPresent(params, "packaging", model::setPackaging);
 		applyIfPresent(params, "javaVersion", model::setJavaVersion);
 		applyIfPresent(params, "configurationFileFormat", model::setConfigurationFileFormat);
+		applyIfPresent(params, "exampleId", model::setExampleId);
 		String dependencies = params.get("dependencies");
 		if (dependencies != null) {
 			Set<String> ids = new LinkedHashSet<>();

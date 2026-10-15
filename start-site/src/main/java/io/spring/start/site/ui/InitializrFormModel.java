@@ -37,6 +37,8 @@ public class InitializrFormModel {
 
 	private String configurationFileFormat;
 
+	private String exampleId;
+
 	private Set<String> dependencies = new LinkedHashSet<>();
 
 	public String getType() {
@@ -125,6 +127,14 @@ public class InitializrFormModel {
 
 	public void setConfigurationFileFormat(String configurationFileFormat) {
 		this.configurationFileFormat = configurationFileFormat;
+	}
+
+	public String getExampleId() {
+		return this.exampleId;
+	}
+
+	public void setExampleId(String exampleId) {
+		this.exampleId = exampleId;
 	}
 
 	public Set<String> getDependencies() {

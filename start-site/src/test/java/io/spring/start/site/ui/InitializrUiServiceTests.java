@@ -74,6 +74,43 @@ class InitializrUiServiceTests {
 	}
 
 	@Test
+	void selectingHelloWorldExampleOverlaysViewSource() {
+		InitializrFormModel model = this.service.defaultFormModel();
+		model.setExampleId("helloworld");
+		Map<String, String> files = this.service.explore(model);
+		String view = files.entrySet()
+			.stream()
+			.filter((entry) -> entry.getKey().endsWith("/HelloView.java"))
+			.map(Map.Entry::getValue)
+			.findFirst()
+			.orElseThrow();
+		assertThat(view).contains("package org.vaadin.example;").contains("class HelloView");
+	}
+
+	@Test
+	void selectingCrudExampleAddsJpaAndH2AndOverlaysSource() {
+		InitializrFormModel model = this.service.defaultFormModel();
+		model.setExampleId("crud");
+		Map<String, String> files = this.service.explore(model);
+		assertThat(files.keySet()).anyMatch((key) -> key.endsWith("/ContactView.java"))
+			.anyMatch((key) -> key.endsWith("/ContactRepository.java"));
+		String pom = files.entrySet()
+			.stream()
+			.filter((entry) -> entry.getKey().endsWith("/pom.xml"))
+			.map(Map.Entry::getValue)
+			.findFirst()
+			.orElseThrow();
+		assertThat(pom).contains("spring-boot-starter-data-jpa").contains("com.h2database");
+	}
+
+	@Test
+	void noExampleSelectedLeavesProjectWithoutOverlay() {
+		InitializrFormModel model = this.service.defaultFormModel();
+		Map<String, String> files = this.service.explore(model);
+		assertThat(files.keySet()).noneMatch((key) -> key.endsWith("/HelloView.java"));
+	}
+
+	@Test
 	void dependencyGroupsIncludeAllEntriesAndTagCompatibility() {
 		InitializrFormModel model = this.service.defaultFormModel();
 		var groups = this.service.dependencyGroups(model.getBootVersion());
