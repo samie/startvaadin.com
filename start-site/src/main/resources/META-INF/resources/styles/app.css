@@ -198,3 +198,38 @@
 		flex-basis: 6rem;
 	}
 }
+
+/*
+ * Example gallery ("Starting point"): a wrapping grid of selectable Vaadin Card
+ * components below the project form. The Card supplies its own surface, border and
+ * typography; these rules only size the grid items, mark the selected card (keyed off
+ * aria-pressed so state and styling stay in sync), and crop the screenshot thumbnail.
+ */
+.example-cards {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--lumo-space-s);
+	width: 100%;
+}
+
+.example-card {
+	flex: 1 1 12rem;
+	cursor: pointer;
+}
+
+.example-card[aria-pressed="true"] {
+	outline: 2px solid var(--lumo-primary-color);
+	outline-offset: -2px;
+}
+
+.example-card-image {
+	width: 100%;
+	aspect-ratio: 16 / 10;
+	object-fit: cover;
+}
+
+@media (max-width: 44rem) {
+	.example-card {
+		flex: 0 0 100%;
+	}
+}

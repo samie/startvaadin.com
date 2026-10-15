@@ -116,7 +116,7 @@ public class Preferences {
 		return new Entry(name, timestamp, model.getType(), model.getLanguage(), model.getBootVersion(),
 				model.getGroupId(), model.getArtifactId(), model.getName(), model.getDescription(),
 				model.getPackageName(), model.getPackaging(), model.getJavaVersion(),
-				model.getConfigurationFileFormat(), new ArrayList<>(model.getDependencies()));
+				model.getConfigurationFileFormat(), new ArrayList<>(model.getDependencies()), model.getExampleId());
 	}
 
 	/**
@@ -137,6 +137,7 @@ public class Preferences {
 		model.setJavaVersion(entry.javaVersion());
 		model.setConfigurationFileFormat(entry.configurationFileFormat());
 		model.setDependencies(new LinkedHashSet<>(entry.dependencies()));
+		model.setExampleId(entry.exampleId());
 	}
 
 	public static void runOnUi(UI ui, Runnable task) {
@@ -166,15 +167,16 @@ public class Preferences {
 	 * @param javaVersion Java version id
 	 * @param configurationFileFormat configuration file format id
 	 * @param dependencies dependency ids
+	 * @param exampleId selected UI example id (may be {@code null})
 	 */
 	public record Entry(String name, long timestamp, String type, String language, String bootVersion, String groupId,
 			String artifactId, String projectName, String description, String packageName, String packaging,
-			String javaVersion, String configurationFileFormat, List<String> dependencies) {
+			String javaVersion, String configurationFileFormat, List<String> dependencies, String exampleId) {
 
 		public Entry name(String newName) {
 			return new Entry(newName, this.timestamp, this.type, this.language, this.bootVersion, this.groupId,
 					this.artifactId, this.projectName, this.description, this.packageName, this.packaging,
-					this.javaVersion, this.configurationFileFormat, this.dependencies);
+					this.javaVersion, this.configurationFileFormat, this.dependencies, this.exampleId);
 		}
 
 	}

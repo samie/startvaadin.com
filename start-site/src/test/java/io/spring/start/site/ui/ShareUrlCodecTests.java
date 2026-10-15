@@ -51,6 +51,7 @@ class ShareUrlCodecTests {
 		original.setPackaging("war");
 		original.setJavaVersion("21");
 		original.setConfigurationFileFormat("yaml");
+		original.setExampleId("dashboard");
 		original.setDependencies(new LinkedHashSet<>(java.util.List.of("web", "actuator", "data-jpa")));
 
 		String fragment = ShareUrlCodec.encode(original);
@@ -68,6 +69,7 @@ class ShareUrlCodecTests {
 		assertThat(restored.getPackaging()).isEqualTo("war");
 		assertThat(restored.getJavaVersion()).isEqualTo("21");
 		assertThat(restored.getConfigurationFileFormat()).isEqualTo("yaml");
+		assertThat(restored.getExampleId()).isEqualTo("dashboard");
 		assertThat(restored.getDependencies()).containsExactly("web", "actuator", "data-jpa");
 	}
 
