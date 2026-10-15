@@ -19,7 +19,7 @@ final class Branding {
 	static final String TITLE = "Vaadin Initializr — Spring Boot + Vaadin project starter";
 
 	/** Short, visible headline shown under the navbar title. */
-	static final String TAGLINE = "Bootstrap a Spring Boot project with a Vaadin UI in seconds.";
+	static final String TAGLINE = "Create Vaadin UI for your Java project.";
 
 	/** Meta/Open Graph description (~155 chars). */
 	static final String DESCRIPTION = "Generate a ready-to-run Spring Boot project with a Vaadin front end. "
