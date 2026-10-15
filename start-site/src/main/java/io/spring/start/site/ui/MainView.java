@@ -33,6 +33,8 @@ import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import io.spring.start.site.ui.Preferences.Entry;
+import io.spring.start.site.ui.examples.Example;
+import io.spring.start.site.ui.examples.ExampleCatalog;
 
 /**
  * Root view of the start.spring.io Vaadin UI. Owns {@code GET /} and composes the
@@ -55,6 +57,8 @@ public class MainView extends AppLayout {
 
 	private final ProjectFormSection formSection;
 
+	private final ExamplesSection examplesSection;
+
 	private final DependenciesSection dependenciesSection;
 
 	private final ActionsBar actionsBar;
@@ -74,6 +78,7 @@ public class MainView extends AppLayout {
 		this.binder = new Binder<>(InitializrFormModel.class);
 		this.binder.setBean(this.model);
 		this.formSection = new ProjectFormSection(this.service, this.model, this.binder);
+		this.examplesSection = new ExamplesSection(this.service, this.model, this::applyExample);
 		this.dependenciesSection = new DependenciesSection(this.service, this.model);
 		this.actionsBar = new ActionsBar(this.service, this.model);
 		// Dark-first initial state; applyTheme reconciles with any saved preference.
@@ -126,6 +131,7 @@ public class MainView extends AppLayout {
 		}
 		this.binder.readBean(this.model);
 		this.dependenciesSection.refresh();
+		this.examplesSection.select(this.model.getExampleId());
 		getElement().executeJs("history.replaceState(null, '', window.location.pathname);");
 	}
 
@@ -187,6 +193,24 @@ public class MainView extends AppLayout {
 
 	private void loadEntry(Entry entry) {
 		Preferences.apply(entry, this.model);
+		this.binder.readBean(this.model);
+		this.dependenciesSection.refresh();
+		this.examplesSection.select(this.model.getExampleId());
+	}
+
+	private void applyExample(Example example) {
+		Example previous = ExampleCatalog.find(this.model.getExampleId());
+		if (previous != null) {
+			this.model.getDependencies().removeAll(previous.dependencies());
+		}
+		if (example != null) {
+			this.model.getDependencies().addAll(example.dependencies());
+			this.model.setExampleId(example.id());
+		}
+		else {
+			this.model.setExampleId(null);
+		}
+		this.examplesSection.select(this.model.getExampleId());
 		this.binder.readBean(this.model);
 		this.dependenciesSection.refresh();
 	}
@@ -262,7 +286,7 @@ public class MainView extends AppLayout {
 	 * @return the content layout to mount as the AppLayout content
 	 */
 	private Component buildContent() {
-		VerticalLayout formColumn = new VerticalLayout(this.formSection);
+		VerticalLayout formColumn = new VerticalLayout(this.formSection, this.examplesSection);
 		formColumn.setPadding(true);
 		formColumn.setSpacing(true);
 		formColumn.addClassNames("main-column", "main-column-form");

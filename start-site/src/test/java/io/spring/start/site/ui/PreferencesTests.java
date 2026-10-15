@@ -32,6 +32,7 @@ class PreferencesTests {
 		original.setPackaging("war");
 		original.setJavaVersion("21");
 		original.setConfigurationFileFormat("yaml");
+		original.setExampleId("crud");
 		original.setDependencies(new LinkedHashSet<>(java.util.List.of("web", "actuator")));
 
 		Entry entry = Preferences.snapshot("my widget", 1717000000000L, original);
@@ -50,6 +51,7 @@ class PreferencesTests {
 		assertThat(restored.getPackaging()).isEqualTo("war");
 		assertThat(restored.getJavaVersion()).isEqualTo("21");
 		assertThat(restored.getConfigurationFileFormat()).isEqualTo("yaml");
+		assertThat(restored.getExampleId()).isEqualTo("crud");
 		assertThat(restored.getDependencies()).containsExactly("web", "actuator");
 		assertThat(entry.name()).isEqualTo("my widget");
 		assertThat(entry.timestamp()).isEqualTo(1717000000000L);

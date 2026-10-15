@@ -12,9 +12,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -30,6 +32,9 @@ import io.spring.initializr.web.project.ProjectGenerationInvoker;
 import io.spring.initializr.web.project.ProjectGenerationResult;
 import io.spring.initializr.web.project.ProjectRequest;
 import io.spring.initializr.web.project.WebProjectRequest;
+import io.spring.start.site.ui.examples.Example;
+import io.spring.start.site.ui.examples.ExampleCatalog;
+import io.spring.start.site.ui.examples.ExampleOverlay;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.util.StringUtils;
@@ -47,6 +52,8 @@ public class InitializrUiService {
 	private final InitializrMetadataProvider metadataProvider;
 
 	private final ProjectGenerationInvoker<ProjectRequest> invoker;
+
+	private final ExampleOverlay exampleOverlay = new ExampleOverlay();
 
 	public InitializrUiService(InitializrMetadataProvider metadataProvider, ApplicationContext applicationContext) {
 		this.metadataProvider = metadataProvider;
@@ -80,6 +87,10 @@ public class InitializrUiService {
 
 	public List<DefaultMetadataElement> getConfigurationFileFormats() {
 		return getMetadata().getConfigurationFileFormats().getContent();
+	}
+
+	public List<Example> getExamples() {
+		return ExampleCatalog.all();
 	}
 
 	public InitializrFormModel defaultFormModel() {
@@ -195,8 +206,19 @@ public class InitializrUiService {
 		request.setJavaVersion(model.getJavaVersion());
 		request.setConfigurationFileFormat(model.getConfigurationFileFormat());
 		request.setBaseDir(model.getArtifactId());
-		request.setDependencies(new ArrayList<>(model.getDependencies()));
-		return this.invoker.invokeProjectStructureGeneration(request);
+		Example example = ExampleCatalog.find(model.getExampleId());
+		Set<String> dependencies = new LinkedHashSet<>(model.getDependencies());
+		if (example != null) {
+			dependencies.addAll(example.dependencies());
+		}
+		request.setDependencies(new ArrayList<>(dependencies));
+		ProjectGenerationResult result = this.invoker.invokeProjectStructureGeneration(request);
+		if (example != null) {
+			Path projectDirectory = StringUtils.hasText(model.getArtifactId())
+					? result.getRootDirectory().resolve(model.getArtifactId()) : result.getRootDirectory();
+			this.exampleOverlay.apply(projectDirectory, example, model.getPackageName());
+		}
+		return result;
 	}
 
 	private byte[] zip(Path root) {
