@@ -38,17 +38,16 @@ import io.spring.start.site.stats.Count;
 import io.spring.start.site.stats.StatisticsService;
 
 /**
- * A light-hearted usage dashboard for the curious. Mounted under the Vaadin url-mapping
- * ({@code /ui/*}) as {@code /ui/statistics} (plus a {@code /ui/stats} alias);
- * {@code HomeController} redirects the friendly {@code /stats} and {@code /statistics}
- * paths here. Mirrors {@link MainView}'s shell (Aura theme + dark-mode toggle) and
- * refreshes itself on a poll so the total ticks up live while the page is watched.
+ * A light-hearted usage dashboard for the curious. Served at {@code /statistics} (plus a
+ * {@code /stats} alias) by Vaadin's root mapping. Mirrors {@link MainView}'s shell (Aura
+ * theme + dark-mode toggle) and refreshes itself on a poll so the total ticks up live
+ * while the page is watched.
  *
  * @author Sami Ekblad
  */
 @Route("statistics")
 @RouteAlias("stats")
-@PageTitle("Statistics · Vaadin Initializr")
+@PageTitle("Statistics · " + Branding.NAME)
 public final class StatisticsView extends AppLayout {
 
 	private static final int TOP_DEPENDENCIES = 12;

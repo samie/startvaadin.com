@@ -1,0 +1,14 @@
+{
+  "name": "Vaadin Initializr",
+  "short_name": "Initializr",
+  "description": "Generate a ready-to-run Spring Boot project with a Vaadin front end.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "theme_color": "#056ff0",
+  "background_color": "#0f0f0f",
+  "icons": [
+    { "src": "/images/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/images/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

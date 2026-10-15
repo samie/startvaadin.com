@@ -49,9 +49,8 @@ public class ShareDialog extends Dialog {
 
 	private void resolveFullUrl(String fragment) {
 		UI ui = UI.getCurrent();
-		// Force the bare "/" path so share URLs work whether the user is on /ui/ or /.
-		// The redirect at / preserves the hash fragment, so the recipient lands on /ui/
-		// with the form populated.
+		// Share URLs point at the site root (origin + "/"); the recipient lands on the
+		// generator with the form populated from the "#!" fragment.
 		ui.getPage()
 			.executeJs("return window.location.origin + '/';")
 			.then(String.class, (origin) -> this.urlField.setValue(origin + fragment));
