@@ -59,6 +59,21 @@
 	}
 }
 
+/* "New to Vaadin?" tutorial link, next to the theme toggle. Dropped below the
+   main breakpoint for the same reason as .app-tagline above. */
+.new-to-vaadin-link {
+	align-self: center;
+	font-size: 0.8125rem;
+	color: var(--vaadin-text-color-secondary);
+	white-space: nowrap;
+}
+
+@media (max-width: 44rem) {
+	.new-to-vaadin-link {
+		display: none;
+	}
+}
+
 /*
  * Monospace utility for technical/code-like data (versions, coordinates).
  * Custom properties inherit into a component's internal parts, so retargeting

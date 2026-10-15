@@ -20,6 +20,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
@@ -33,6 +34,7 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import io.spring.start.site.StartConfigurationProperties;
 import io.spring.start.site.ui.Preferences.Entry;
 import io.spring.start.site.ui.examples.Example;
 import io.spring.start.site.ui.examples.ExampleCatalog;
@@ -66,15 +68,18 @@ public class MainView extends AppLayout {
 
 	private final Button themeToggle;
 
+	private final String tutorialUrl;
+
 	private final List<Entry> histories = new ArrayList<>();
 
 	private final List<Entry> favorites = new ArrayList<>();
 
 	private boolean darkMode = true;
 
-	public MainView(InitializrUiService service, Preferences preferences) {
+	public MainView(InitializrUiService service, Preferences preferences, StartConfigurationProperties properties) {
 		this.service = service;
 		this.preferences = preferences;
+		this.tutorialUrl = Branding.tutorialUrl(properties.getPublicUrl());
 		this.model = service.defaultFormModel();
 		this.binder = new Binder<>(InitializrFormModel.class);
 		this.binder.setBean(this.model);
@@ -251,6 +256,9 @@ public class MainView extends AppLayout {
 	}
 
 	private void buildDrawer() {
+		Button tutorial = new Button("Tutorial", new Icon(VaadinIcon.ACADEMY_CAP),
+				(event) -> getUI().ifPresent((ui) -> ui.getPage().open(this.tutorialUrl, "_blank")));
+		tutorial.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
 		Button history = new Button("History", new Icon(VaadinIcon.CLOCK), (event) -> openHistoryDialog());
 		history.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
 		Button favorites = new Button("Favorites", new Icon(VaadinIcon.STAR), (event) -> openFavoritesDialog());
@@ -258,7 +266,7 @@ public class MainView extends AppLayout {
 		Button statistics = new Button("Statistics", new Icon(VaadinIcon.CHART),
 				(event) -> getUI().ifPresent((ui) -> ui.navigate(StatisticsView.class)));
 		statistics.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-		VerticalLayout drawer = new VerticalLayout(history, favorites, statistics);
+		VerticalLayout drawer = new VerticalLayout(tutorial, history, favorites, statistics);
 		drawer.setPadding(true);
 		drawer.setSpacing(true);
 		addToDrawer(drawer);
@@ -272,7 +280,11 @@ public class MainView extends AppLayout {
 		// screens via the .app-tagline rules in styles/app.css.
 		Span tagline = new Span(Branding.TAGLINE);
 		tagline.addClassName("app-tagline");
-		HorizontalLayout right = new HorizontalLayout(this.themeToggle);
+		Anchor newToVaadin = new Anchor(this.tutorialUrl, "New to Vaadin?");
+		newToVaadin.setTarget("_blank");
+		newToVaadin.getElement().setAttribute("rel", "noopener");
+		newToVaadin.addClassName("new-to-vaadin-link");
+		HorizontalLayout right = new HorizontalLayout(newToVaadin, this.themeToggle);
 		right.setSpacing(true);
 		right.setAlignItems(FlexComponent.Alignment.CENTER);
 		right.getStyle().set("margin-left", "auto").set("margin-right", "var(--vaadin-padding-l, 1rem)");
