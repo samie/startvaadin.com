@@ -208,7 +208,8 @@
 										META-INF/resources/webjars/simple-icons/${simple-icons.version}/icons/ollama.svg,
 										META-INF/resources/webjars/simple-icons/${simple-icons.version}/icons/googlegemini.svg,
 										META-INF/resources/webjars/simple-icons/${simple-icons.version}/icons/elevenlabs.svg,
-										META-INF/resources/webjars/simple-icons/${simple-icons.version}/icons/milvus.svg
+										META-INF/resources/webjars/simple-icons/${simple-icons.version}/icons/milvus.svg,
+										META-INF/resources/webjars/simple-icons/${simple-icons.version}/icons/github.svg
 									</includes>
 								</artifactItem>
 							</artifactItems>
