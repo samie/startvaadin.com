@@ -41,7 +41,7 @@ public class DependenciesSection extends VerticalLayout {
 		setPadding(false);
 		setSpacing(true);
 		setWidthFull();
-		add(new H2("Dependencies"));
+		add(new H2("Project dependencies"));
 		this.addButton = new Button("Add dependencies...", new Icon(VaadinIcon.PLUS), (event) -> openPicker());
 		this.addButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 		add(this.addButton);

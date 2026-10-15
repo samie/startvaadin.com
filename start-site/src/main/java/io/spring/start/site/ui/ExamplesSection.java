@@ -37,7 +37,7 @@ public class ExamplesSection extends VerticalLayout {
 		setPadding(false);
 		setSpacing(true);
 		setWidthFull();
-		add(new H2("Starting point"));
+		add(new H2("Application UI"));
 		FlexLayout grid = new FlexLayout();
 		grid.addClassName("example-cards");
 		for (Example example : service.getExamples()) {
