@@ -39,6 +39,26 @@ class VendorIconsTests {
 	}
 
 	@Test
+	void vendorSpecificDependenciesResolveToTheirBrandSlug() {
+		assertThat(VendorIcons.resolveSlug(Dependency.withId("h2"))).isEqualTo("h2database");
+		assertThat(VendorIcons.resolveSlug(Dependency.withId("cloudfoundry"))).isEqualTo("cloudfoundry");
+		assertThat(VendorIcons.resolveSlug(Dependency.withId("htmx"))).isEqualTo("htmx");
+		assertThat(VendorIcons.resolveSlug(Dependency.withId("tanzu-spring-sdk"))).isEqualTo("vmware");
+		assertThat(VendorIcons.resolveSlug(Dependency.withId("spring-ai-mcp-server")))
+			.isEqualTo("modelcontextprotocol");
+		assertThat(VendorIcons.resolveSlug(Dependency.withId("mcp-security"))).isEqualTo("modelcontextprotocol");
+		assertThat(VendorIcons.resolveSlug(Dependency.withId("spring-ai-deepseek"))).isEqualTo("deepseek");
+		assertThat(VendorIcons.resolveSlug(Dependency.withId("spring-ai-vectordb-qdrant"))).isEqualTo("qdrant");
+		assertThat(VendorIcons.resolveSlug(Dependency.withId("spring-ai-markdown-document-reader")))
+			.isEqualTo("markdown");
+		assertThat(VendorIcons.resolveSlug(Dependency.withId("spring-ai-tika-document-reader"))).isEqualTo("apache");
+		assertThat(VendorIcons.resolveSlug(Dependency.withId("spring-ai-chat-memory-repository-neo4j")))
+			.isEqualTo("neo4j");
+		assertThat(VendorIcons.resolveSlug(Dependency.withId("spring-ai-chat-memory-repository-redis")))
+			.isEqualTo("redis");
+	}
+
+	@Test
 	void springAuthoredDependencyWithoutVendorIconFallsBackToSpringSlug() {
 		Dependency dependency = Dependency.withId("web", "org.springframework.boot", "spring-boot-starter-web");
 		assertThat(VendorIcons.resolveSlug(dependency)).isEqualTo("spring");
@@ -54,14 +74,14 @@ class VendorIconsTests {
 	@Test
 	void iconUsesAbsoluteRootRelativeSrcForResolvedSlug() {
 		SvgIcon icon = VendorIcons.icon(Dependency.withId("postgresql"));
-		assertThat(icon.getSrc()).isEqualTo("/images/vendors/postgresql.svg");
+		assertThat(icon.getSrc()).isEqualTo("/assets/vendor-icons/icons/postgresql.svg");
 		assertThat(icon.getClassNames()).contains("dependency-icon");
 	}
 
 	@Test
 	void iconFallsBackToDefaultSrcForUnknownDependency() {
 		SvgIcon icon = VendorIcons.icon(Dependency.withId("totally-unknown"));
-		assertThat(icon.getSrc()).isEqualTo("/images/vendors/openjdk.svg");
+		assertThat(icon.getSrc()).isEqualTo("/assets/vendor-icons/icons/openjdk.svg");
 	}
 
 }

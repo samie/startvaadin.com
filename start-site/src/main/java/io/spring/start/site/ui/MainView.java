@@ -267,7 +267,7 @@ public class MainView extends AppLayout {
 		Button statistics = new Button("Statistics", new Icon(VaadinIcon.CHART),
 				(event) -> getUI().ifPresent((ui) -> ui.navigate(StatisticsView.class)));
 		statistics.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-		SvgIcon githubIcon = new SvgIcon("/images/vendors/github.svg");
+		SvgIcon githubIcon = new SvgIcon("/assets/vendor-icons/icons/github.svg");
 		githubIcon.addClassName("dependency-icon");
 		githubIcon.getStyle().set("--vaadin-icon-size", "var(--lumo-icon-size-m, 24px)");
 		Button repository = new Button("GitHub repo", githubIcon,
