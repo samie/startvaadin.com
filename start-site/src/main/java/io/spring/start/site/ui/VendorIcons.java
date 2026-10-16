@@ -4,33 +4,25 @@
 
 package io.spring.start.site.ui;
 
-import java.io.IOException;
-import java.util.Arrays;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import com.vaadin.flow.component.icon.SvgIcon;
 import io.spring.initializr.metadata.Dependency;
 
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
-
 /**
- * Resolves a dependency to a vendor {@link SvgIcon}. Icons are curated SVGs from
- * simple-icons, unpacked onto the classpath at build time (see start-site/pom.xml) under
- * {@code META-INF/resources/images/vendors}. Dependencies without a matching vendor icon
- * fall back to a generic Spring icon when their resolved Maven group id is
- * Spring-authored ({@code org.springframework*}), or to a generic OpenJDK icon otherwise.
+ * Resolves a dependency to a vendor {@link SvgIcon}. Icons are curated SVGs from the
+ * simple-icons npm package, copied into the static resource folder at build time by the
+ * {@code @NpmPackage(assets = ...)} mapping on {@link AppShell} and served under
+ * {@code /assets/vendor-icons}. Dependencies without a matching vendor icon fall back to
+ * a generic Spring icon when their resolved Maven group id is Spring-authored
+ * ({@code org.springframework*}), or to a generic OpenJDK icon otherwise.
  *
  * @author Sami Ekblad
  */
 public final class VendorIcons {
 
-	private static final String RESOURCE_PATTERN = "classpath*:META-INF/resources/images/vendors/*.svg";
-
-	private static final String ICON_PATH_PREFIX = "/images/vendors/";
+	private static final String ICON_PATH_PREFIX = "/assets/vendor-icons/icons/";
 
 	private static final String ICON_EXTENSION = ".svg";
 
@@ -75,9 +67,33 @@ public final class VendorIcons {
 			Map.entry("spring-ai-vectordb-aws-opensearch", "opensearch"),
 			Map.entry("spring-ai-vectordb-redis", "redis"), Map.entry("spring-ai-vectordb-mariadb", "mariadb"),
 			Map.entry("spring-ai-vectordb-pgvector", "postgresql"), Map.entry("spring-ai-postgresml", "postgresql"),
-			Map.entry("spring-ai-vertexai-embeddings", "googlecloud"));
+			Map.entry("spring-ai-vertexai-embeddings", "googlecloud"), Map.entry("h2", "h2database"),
+			Map.entry("tanzu-governance-starter", "vmware"), Map.entry("tanzu-scg-access-control", "vmware"),
+			Map.entry("tanzu-scg-custom", "vmware"), Map.entry("tanzu-scg-graphql", "vmware"),
+			Map.entry("tanzu-scg-sso", "vmware"), Map.entry("tanzu-scg-traffic-control", "vmware"),
+			Map.entry("tanzu-scg-transformation", "vmware"), Map.entry("tanzu-spring-sdk", "vmware"),
+			Map.entry("spring-ai-deepseek", "deepseek"), Map.entry("spring-ai-mcp-server", "modelcontextprotocol"),
+			Map.entry("spring-ai-mcp-client", "modelcontextprotocol"),
+			Map.entry("mcp-security", "modelcontextprotocol"), Map.entry("spring-ai-vectordb-qdrant", "qdrant"),
+			Map.entry("spring-ai-markdown-document-reader", "markdown"),
+			Map.entry("spring-ai-tika-document-reader", "apache"),
+			Map.entry("spring-ai-chat-memory-repository-redis", "redis"),
+			Map.entry("spring-ai-chat-memory-repository-cassandra", "apachecassandra"),
+			Map.entry("spring-ai-chat-memory-repository-mongodb", "mongodb"),
+			Map.entry("spring-ai-chat-memory-repository-neo4j", "neo4j"));
 
-	private static final Set<String> AVAILABLE_SLUGS = scanAvailableSlugs();
+	/**
+	 * Slugs copied into the static resource folder. Must stay in sync with the
+	 * {@code assets} glob on {@link AppShell}.
+	 */
+	private static final Set<String> AVAILABLE_SLUGS = Set.of("vaadin", "postgresql", "mysql", "mariadb", "mongodb",
+			"redis", "neo4j", "apachecassandra", "apachekafka", "elasticsearch", "rabbitmq", "openjdk", "docker",
+			"graphql", "springsecurity", "spring", "okta", "thymeleaf", "apachefreemarker", "apachegroovy", "kotlin",
+			"sqlite", "couchbase", "apachepulsar", "consul", "vault", "netflix", "googlecloud", "googlepubsub",
+			"googlecloudstorage", "opensearch", "swagger", "sentry", "datadog", "dynatrace", "influxdb", "newrelic",
+			"prometheus", "opentelemetry", "anthropic", "mistralai", "ollama", "googlegemini", "elevenlabs", "milvus",
+			"github", "h2database", "cloudfoundry", "vmware", "modelcontextprotocol", "markdown", "apache", "htmx",
+			"deepseek", "qdrant");
 
 	private VendorIcons() {
 	}
@@ -111,20 +127,6 @@ public final class VendorIcons {
 
 	private static String iconPath(String slug) {
 		return ICON_PATH_PREFIX + slug + ICON_EXTENSION;
-	}
-
-	private static Set<String> scanAvailableSlugs() {
-		try {
-			Resource[] resources = new PathMatchingResourcePatternResolver().getResources(RESOURCE_PATTERN);
-			return Arrays.stream(resources)
-				.map(Resource::getFilename)
-				.filter(Objects::nonNull)
-				.map((name) -> name.substring(0, name.length() - ICON_EXTENSION.length()))
-				.collect(Collectors.toUnmodifiableSet());
-		}
-		catch (IOException ex) {
-			throw new IllegalStateException("Failed to scan vendor icons on the classpath", ex);
-		}
 	}
 
 }
