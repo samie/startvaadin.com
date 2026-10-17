@@ -104,7 +104,7 @@ public class DependenciesSection extends VerticalLayout {
 		VerticalLayout text = new VerticalLayout(title, detail);
 		text.setPadding(false);
 		text.setSpacing(false);
-		Button remove = new Button(new Icon(VaadinIcon.CLOSE_SMALL), (event) -> toggle(id));
+		Button remove = new Button(new Icon(VaadinIcon.CLOSE), (event) -> toggle(id));
 		remove.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE, ButtonVariant.LUMO_SMALL);
 		remove.setAriaLabel("Remove " + name);
 		remove.setTooltipText("Remove " + name);

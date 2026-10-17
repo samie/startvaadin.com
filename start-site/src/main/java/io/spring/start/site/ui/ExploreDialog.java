@@ -14,6 +14,7 @@ import com.vaadin.flow.component.html.Pre;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.treegrid.TreeGrid;
+import com.vaadin.flow.data.provider.hierarchy.HierarchicalDataProvider.HierarchyFormat;
 import com.vaadin.flow.data.provider.hierarchy.TreeData;
 import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider;
 
@@ -40,7 +41,7 @@ public class ExploreDialog extends Dialog {
 		// dialog; the content pane (below) takes the remaining width.
 		tree.getStyle().set("flex", "0 0 auto").set("width", "fit-content").set("max-width", "22rem");
 		TreeData<Node> data = buildTreeData(files);
-		tree.setDataProvider(new TreeDataProvider<>(data));
+		tree.setDataProvider(new TreeDataProvider<>(data, HierarchyFormat.NESTED));
 		tree.addSelectionListener((event) -> event.getFirstSelectedItem()
 			.ifPresent((node) -> this.fileContent.setText((node.content() != null) ? node.content() : PLACEHOLDER)));
 		tree.expandRecursively(data.getRootItems(), 3);
