@@ -5,6 +5,7 @@
 package io.spring.start.site.stats;
 
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -12,6 +13,7 @@ import java.time.Instant;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
@@ -19,6 +21,7 @@ import java.util.concurrent.atomic.LongAdder;
 
 import io.spring.initializr.web.project.ProjectGeneratedEvent;
 import io.spring.initializr.web.project.ProjectRequest;
+import io.spring.initializr.web.project.WebProjectRequest;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import tools.jackson.databind.json.JsonMapper;
@@ -42,6 +45,17 @@ import org.springframework.util.StringUtils;
  * @author Sami Ekblad
  */
 public final class StatisticsService implements DisposableBean {
+
+	/**
+	 * Request parameter the Vaadin UI sets on its in-process generation requests to
+	 * record which UI action triggered it ("generate" or "explore"). Absent for CLI
+	 * {@code /starter.zip} requests, which are tallied as {@value #CLI_ACTION}.
+	 */
+	public static final String UI_ACTION_PARAMETER = "x-start-ui-action";
+
+	private static final String CLI_ACTION = "cli";
+
+	private static final String DIRECT_REFERRER = "direct";
 
 	// Persist after this many new generations (a debounce so hot paths do not hit disk on
 	// every request); a final flush also runs on shutdown via destroy().
@@ -71,6 +85,12 @@ public final class StatisticsService implements DisposableBean {
 
 	private final Map<String, LongAdder> buildSystems = new ConcurrentHashMap<>();
 
+	private final Map<String, LongAdder> packaging = new ConcurrentHashMap<>();
+
+	private final Map<String, LongAdder> uiActions = new ConcurrentHashMap<>();
+
+	private final Map<String, LongAdder> referrers = new ConcurrentHashMap<>();
+
 	private volatile long countingSinceEpochMs = System.currentTimeMillis();
 
 	private volatile long lastGeneratedEpochMs;
@@ -90,12 +110,26 @@ public final class StatisticsService implements DisposableBean {
 		increment(this.bootVersions, request.getBootVersion());
 		increment(this.languages, request.getLanguage());
 		increment(this.buildSystems, buildSystem(request.getType()));
+		increment(this.packaging, request.getPackaging());
+		increment(this.uiActions, uiAction(request));
 		List<String> deps = request.getDependencies();
 		if (deps != null) {
 			for (String dep : deps) {
 				increment(this.dependencies, dep);
 			}
 		}
+		maybeSave();
+	}
+
+	/**
+	 * Record a page arrival by referrer. Called by the arrival listener on each full page
+	 * load (genuine arrivals, not in-app navigations).
+	 * @param referer the browser-supplied {@code Referer} header (may be null/blank)
+	 * @param selfHost this deployment's own host, so self/reload referrals collapse to
+	 * {@value #DIRECT_REFERRER} rather than inflating the referrer list (may be null)
+	 */
+	public void recordArrival(String referer, String selfHost) {
+		increment(this.referrers, referrerHost(referer, selfHost));
 		maybeSave();
 	}
 
@@ -132,6 +166,22 @@ public final class StatisticsService implements DisposableBean {
 		return toCounts(this.buildSystems, 0);
 	}
 
+	public List<Count> bootVersionDistribution() {
+		return toCounts(this.bootVersions, 0);
+	}
+
+	public List<Count> packagingDistribution() {
+		return toCounts(this.packaging, 0);
+	}
+
+	public List<Count> uiActionDistribution() {
+		return toCounts(this.uiActions, 0);
+	}
+
+	public List<Count> referrerDistribution() {
+		return toCounts(this.referrers, 0);
+	}
+
 	private List<Count> toCounts(Map<String, LongAdder> map, int limit) {
 		long grand = this.total.get();
 		return map.entrySet()
@@ -166,6 +216,37 @@ public final class StatisticsService implements DisposableBean {
 		return "unknown";
 	}
 
+	private static String uiAction(ProjectRequest request) {
+		if (request instanceof WebProjectRequest web) {
+			Object action = web.getParameters().get(UI_ACTION_PARAMETER);
+			if (action instanceof String text && StringUtils.hasText(text)) {
+				return text;
+			}
+		}
+		return CLI_ACTION;
+	}
+
+	static String referrerHost(String referer, String selfHost) {
+		if (!StringUtils.hasText(referer)) {
+			return DIRECT_REFERRER;
+		}
+		try {
+			String host = URI.create(referer.trim()).getHost();
+			if (!StringUtils.hasText(host)) {
+				return DIRECT_REFERRER;
+			}
+			host = host.toLowerCase(Locale.ROOT);
+			if (StringUtils.hasText(selfHost) && host.equalsIgnoreCase(selfHost)) {
+				return DIRECT_REFERRER;
+			}
+			return host;
+		}
+		catch (IllegalArgumentException ex) {
+			// A malformed Referer must never break a request; treat it as direct.
+			return DIRECT_REFERRER;
+		}
+	}
+
 	private void maybeSave() {
 		if (this.file == null) {
 			return;
@@ -193,6 +274,9 @@ public final class StatisticsService implements DisposableBean {
 			restore(this.bootVersions, snapshot.bootVersions());
 			restore(this.languages, snapshot.languages());
 			restore(this.buildSystems, snapshot.buildSystems());
+			restore(this.packaging, snapshot.packaging());
+			restore(this.uiActions, snapshot.uiActions());
+			restore(this.referrers, snapshot.referrers());
 		}
 		catch (IOException | RuntimeException ex) {
 			// A missing/corrupt file must never stop the app; start fresh instead.
@@ -234,7 +318,7 @@ public final class StatisticsService implements DisposableBean {
 	private StatisticsSnapshot snapshot() {
 		return new StatisticsSnapshot(this.total.get(), this.countingSinceEpochMs, this.lastGeneratedEpochMs,
 				toMap(this.dependencies), toMap(this.javaVersions), toMap(this.bootVersions), toMap(this.languages),
-				toMap(this.buildSystems));
+				toMap(this.buildSystems), toMap(this.packaging), toMap(this.uiActions), toMap(this.referrers));
 	}
 
 	private static Map<String, Long> toMap(Map<String, LongAdder> map) {
