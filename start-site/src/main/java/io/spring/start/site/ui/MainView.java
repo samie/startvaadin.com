@@ -89,7 +89,7 @@ public class MainView extends AppLayout {
 		this.dependenciesSection = new DependenciesSection(this.service, this.model);
 		this.actionsBar = new ActionsBar(this.service, this.model);
 		// Dark-first initial state; applyTheme reconciles with any saved preference.
-		this.themeToggle = new Button(new Icon(VaadinIcon.SUN_O), (event) -> toggleTheme());
+		this.themeToggle = new Button(new Icon(VaadinIcon.SUN), (event) -> toggleTheme());
 		this.themeToggle.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
 		this.themeToggle.setAriaLabel("Switch to light mode");
 		this.themeToggle.setTooltipText("Switch to light mode");
@@ -354,7 +354,7 @@ public class MainView extends AppLayout {
 	 */
 	private void setDarkMode(boolean dark) {
 		this.darkMode = dark;
-		this.themeToggle.setIcon(new Icon(dark ? VaadinIcon.SUN_O : VaadinIcon.MOON));
+		this.themeToggle.setIcon(new Icon(dark ? VaadinIcon.SUN : VaadinIcon.MOON));
 		String label = dark ? "Switch to light mode" : "Switch to dark mode";
 		this.themeToggle.setAriaLabel(label);
 		this.themeToggle.setTooltipText(label);
