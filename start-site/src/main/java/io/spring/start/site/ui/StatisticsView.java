@@ -77,7 +77,7 @@ public final class StatisticsView extends AppLayout {
 		this.service = service;
 		this.preferences = preferences;
 		this.pollMillis = Math.max(2, properties.getStatistics().getPollIntervalSeconds()) * 1000;
-		this.themeToggle = new Button(new Icon(VaadinIcon.SUN_O), (event) -> toggleTheme());
+		this.themeToggle = new Button(new Icon(VaadinIcon.SUN), (event) -> toggleTheme());
 		this.themeToggle.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
 		this.themeToggle.setAriaLabel("Switch to light mode");
 		this.themeToggle.setTooltipText("Switch to light mode");
@@ -227,7 +227,7 @@ public final class StatisticsView extends AppLayout {
 
 	private void setDarkMode(boolean dark) {
 		this.darkMode = dark;
-		this.themeToggle.setIcon(new Icon(dark ? VaadinIcon.SUN_O : VaadinIcon.MOON));
+		this.themeToggle.setIcon(new Icon(dark ? VaadinIcon.SUN : VaadinIcon.MOON));
 		String label = dark ? "Switch to light mode" : "Switch to dark mode";
 		this.themeToggle.setAriaLabel(label);
 		this.themeToggle.setTooltipText(label);
