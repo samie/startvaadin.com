@@ -14,6 +14,7 @@ import io.spring.start.site.project.ProjectDescriptionCustomizerConfiguration;
 import io.spring.start.site.stats.StatisticsService;
 import io.spring.start.site.support.CacheableMavenVersionResolver;
 import io.spring.start.site.support.StartInitializrMetadataUpdateStrategy;
+import io.spring.start.site.ui.ArrivalStatisticsInitListener;
 import io.spring.start.site.ui.InitializrUiService;
 import io.spring.start.site.ui.Preferences;
 import io.spring.start.site.ui.SocialMetaInitListener;
@@ -108,6 +109,11 @@ public class StartApplication {
 	@Bean
 	public SocialMetaInitListener socialMetaInitListener(StartConfigurationProperties properties) {
 		return new SocialMetaInitListener(properties);
+	}
+
+	@Bean
+	public ArrivalStatisticsInitListener arrivalStatisticsInitListener(StatisticsService statisticsService) {
+		return new ArrivalStatisticsInitListener(statisticsService);
 	}
 
 }
