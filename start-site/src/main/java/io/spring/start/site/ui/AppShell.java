@@ -19,6 +19,7 @@ import com.vaadin.flow.theme.aura.Aura;
  * @author Vaadin UI Migration
  */
 @StyleSheet(Aura.STYLESHEET)
+@StyleSheet("https://fonts.googleapis.com/css2?family=Orbitron:wght@800&display=swap")
 @StyleSheet("context://styles/app.css")
 @NpmPackage(value = "simple-icons", version = "16.35.0", assets = { "icons/vaadin.svg:vendor-icons",
 		"icons/postgresql.svg:vendor-icons", "icons/mysql.svg:vendor-icons", "icons/mariadb.svg:vendor-icons",
