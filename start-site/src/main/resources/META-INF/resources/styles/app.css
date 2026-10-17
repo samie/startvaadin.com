@@ -42,6 +42,44 @@
 }
 
 /*
+ * Brand wordmark in the navbar: "Vaadin" in the primary text color, "Initializr"
+ * in the Vaadin-blue accent, and a small "PRO" badge pill. Orbitron (loaded via
+ * @StyleSheet on AppShell) gives the geometric display look; colors use Aura tokens
+ * so both light/dark stay correct and the accent matches the rest of the UI.
+ */
+.app-logo {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.35em;
+	margin: 0;
+	font-family: Orbitron, var(--aura-font-family);
+	font-size: 1.25rem;
+	font-weight: 800;
+	letter-spacing: -0.04em;
+	line-height: 1;
+	white-space: nowrap;
+}
+
+.app-logo-brand {
+	color: var(--vaadin-text-color);
+}
+
+.app-logo-product {
+	color: var(--aura-accent-color);
+}
+
+.app-logo-badge {
+	padding: 0.15em 0.45em;
+	border-radius: 0.4em;
+	background: var(--aura-accent-color);
+	color: #fff;
+	font-family: var(--aura-font-family);
+	font-size: 0.5em;
+	font-weight: 700;
+	letter-spacing: 0;
+}
+
+/*
  * Navbar headline that echoes the social/SEO description (see Branding.TAGLINE). Kept
  * subtle next to the brand title and dropped below the main breakpoint so it never
  * crowds the toolbar on small screens.
@@ -163,7 +201,7 @@
 
 .stat-tile {
 	flex: 1 1 8rem;
-	padding: var(--lumo-space-m);
+	padding: var(--vaadin-padding-l, 1rem);
 	border: 1px solid var(--vaadin-border-color);
 	border-radius: var(--vaadin-radius-l);
 }
