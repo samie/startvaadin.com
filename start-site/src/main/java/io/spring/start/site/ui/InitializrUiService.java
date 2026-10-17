@@ -32,6 +32,7 @@ import io.spring.initializr.web.project.ProjectGenerationInvoker;
 import io.spring.initializr.web.project.ProjectGenerationResult;
 import io.spring.initializr.web.project.ProjectRequest;
 import io.spring.initializr.web.project.WebProjectRequest;
+import io.spring.start.site.stats.StatisticsService;
 import io.spring.start.site.ui.examples.Example;
 import io.spring.start.site.ui.examples.ExampleCatalog;
 import io.spring.start.site.ui.examples.ExampleOverlay;
@@ -166,7 +167,7 @@ public class InitializrUiService {
 	}
 
 	public byte[] generateZip(InitializrFormModel model) {
-		ProjectGenerationResult result = generate(model);
+		ProjectGenerationResult result = generate(model, "generate");
 		try {
 			return zip(result.getRootDirectory());
 		}
@@ -182,7 +183,7 @@ public class InitializrUiService {
 	 * a placeholder value to keep the Explore UI consistent.
 	 */
 	public Map<String, String> explore(InitializrFormModel model) {
-		ProjectGenerationResult result = generate(model);
+		ProjectGenerationResult result = generate(model, "explore");
 		try {
 			return walkAsText(result.getRootDirectory());
 		}
@@ -191,9 +192,10 @@ public class InitializrUiService {
 		}
 	}
 
-	private ProjectGenerationResult generate(InitializrFormModel model) {
+	private ProjectGenerationResult generate(InitializrFormModel model, String uiAction) {
 		WebProjectRequest request = new WebProjectRequest();
 		request.initialize(getMetadata());
+		request.getParameters().put(StatisticsService.UI_ACTION_PARAMETER, uiAction);
 		request.setType(model.getType());
 		request.setLanguage(model.getLanguage());
 		request.setBootVersion(model.getBootVersion());

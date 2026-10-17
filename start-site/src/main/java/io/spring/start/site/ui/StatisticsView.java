@@ -127,9 +127,13 @@ public final class StatisticsView extends AppLayout {
 		}
 		this.content.add(buildTiles(total));
 		this.content.add(section("Top dependencies", bars(this.statistics.topDependencies(TOP_DEPENDENCIES), true)));
+		this.content.add(section("Spring Boot versions", bars(this.statistics.bootVersionDistribution(), false)));
 		this.content.add(section("Java versions", bars(this.statistics.javaVersionDistribution(), false)));
 		this.content.add(section("Build systems", bars(this.statistics.buildSystemDistribution(), false)));
 		this.content.add(section("Languages", bars(this.statistics.languageDistribution(), false)));
+		this.content.add(section("Packaging", bars(this.statistics.packagingDistribution(), false)));
+		this.content.add(section("Generate vs Explore", bars(this.statistics.uiActionDistribution(), false)));
+		this.content.add(section("Arrived from", bars(this.statistics.referrerDistribution(), false)));
 	}
 
 	private Component buildTiles(long total) {
