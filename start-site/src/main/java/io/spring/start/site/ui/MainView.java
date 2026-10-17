@@ -285,8 +285,17 @@ public class MainView extends AppLayout {
 
 	private void buildNavbar() {
 		DrawerToggle toggle = new DrawerToggle();
-		H1 title = new H1(Branding.NAME);
-		title.getStyle().set("font-size", "1.125rem").set("margin", "0");
+		// Two-tone wordmark with a "PRO" badge; see the .app-logo rules in
+		// styles/app.css (Orbitron display font, Aura accent/text tokens).
+		H1 title = new H1();
+		title.addClassName("app-logo");
+		Span brand = new Span("Vaadin");
+		brand.addClassName("app-logo-brand");
+		Span product = new Span("Initializr");
+		product.addClassName("app-logo-product");
+		Span badge = new Span("PRO");
+		badge.addClassName("app-logo-badge");
+		title.add(brand, product, badge);
 		// Visible headline that mirrors the social/SEO description; hidden on narrow
 		// screens via the .app-tagline rules in styles/app.css.
 		Span tagline = new Span(Branding.TAGLINE);
