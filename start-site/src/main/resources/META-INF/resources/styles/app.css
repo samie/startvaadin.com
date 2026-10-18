@@ -195,8 +195,9 @@
 .stat-tiles {
 	display: flex;
 	flex-wrap: wrap;
-	gap: var(--lumo-space-s);
-	margin-bottom: var(--lumo-space-m);
+	gap: var(--vaadin-gap-m, 0.75rem);
+	margin-bottom: var(--vaadin-gap-l, 1.25rem);
+	width: 100%;
 }
 
 .stat-tile {
@@ -213,24 +214,42 @@
 	color: var(--aura-accent-color, var(--lumo-primary-color));
 }
 
+/* Textual tile value (dates, relative times): calmer than a headline count. */
+.stat-text {
+	font-size: 1.125rem;
+	font-weight: 500;
+	line-height: 1.2;
+	color: var(--lumo-body-text-color);
+}
+
 .stat-label {
-	margin-top: var(--lumo-space-xs);
+	margin-top: var(--vaadin-gap-xs, 0.25rem);
 	font-size: 0.8125rem;
 	color: var(--lumo-secondary-text-color);
+}
+
+/* A breakdown section: heading + its bars, full width so it aligns with the tiles. */
+.stat-section {
+	width: 100%;
+}
+
+.stat-section h2 {
+	font-size: 1rem;
+	margin: var(--vaadin-gap-l, 1.25rem) 0 var(--vaadin-gap-xs, 0.25rem);
 }
 
 /* One row per tallied value: label | proportional bar | exact value. */
 .bars {
 	display: flex;
 	flex-direction: column;
-	gap: var(--lumo-space-xs);
+	gap: var(--vaadin-gap-s, 0.5rem);
 	width: 100%;
 }
 
 .bar-row {
 	display: flex;
 	align-items: center;
-	gap: var(--lumo-space-s);
+	gap: var(--vaadin-gap-m, 0.75rem);
 }
 
 .bar-label {
@@ -243,7 +262,8 @@
 
 .bar-track {
 	flex: 1 1 auto;
-	height: 0.75rem;
+	max-width: 28rem;
+	height: 0.5rem;
 	border-radius: var(--vaadin-radius-l);
 	background: var(--lumo-contrast-10pct);
 	overflow: hidden;
@@ -252,7 +272,7 @@
 .bar-fill {
 	height: 100%;
 	border-radius: inherit;
-	background: var(--aura-accent-color, var(--lumo-primary-color));
+	background: color-mix(in srgb, var(--aura-accent-color, var(--lumo-primary-color)) 85%, transparent);
 }
 
 .bar-value {

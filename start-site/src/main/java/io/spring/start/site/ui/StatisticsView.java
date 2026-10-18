@@ -90,9 +90,9 @@ public final class StatisticsView extends AppLayout {
 
 	private void buildNavbar() {
 		RouterLink back = new RouterLink("← Generator", MainView.class);
-		back.getStyle().set("font-size", "0.875rem").set("margin-left", "var(--lumo-space-m)");
+		back.getStyle().set("font-size", "0.875rem").set("margin-left", "var(--vaadin-gap-m, 0.75rem)");
 		H1 title = new H1("Statistics");
-		title.getStyle().set("font-size", "1.125rem").set("margin", "0 0 0 var(--lumo-space-m)");
+		title.getStyle().set("font-size", "1.125rem").set("margin", "0 0 0 var(--vaadin-gap-m, 0.75rem)");
 		HorizontalLayout right = new HorizontalLayout(this.themeToggle);
 		right.setAlignItems(FlexComponent.Alignment.CENTER);
 		right.getStyle().set("margin-left", "auto").set("margin-right", "var(--vaadin-padding-l, 1rem)");
@@ -139,18 +139,21 @@ public final class StatisticsView extends AppLayout {
 	private Component buildTiles(long total) {
 		FlexLayout tiles = new FlexLayout();
 		tiles.addClassName("stat-tiles");
-		tiles.add(tile("Projects generated", formatCount(total)));
-		tiles.add(tile("Counting since", DATE.format(this.statistics.countingSince())));
-		tiles.add(tile("Average / day", formatCount(Math.round(this.statistics.perDayAverage()))));
-		tiles.add(tile("Last generated", relative(this.statistics.lastGenerated())));
+		tiles.add(tile("Projects generated", formatCount(total), true));
+		tiles.add(tile("Counting since", DATE.format(this.statistics.countingSince()), false));
+		tiles.add(tile("Average / day", formatCount(Math.round(this.statistics.perDayAverage())), true));
+		tiles.add(tile("Last generated", relative(this.statistics.lastGenerated()), false));
 		return tiles;
 	}
 
-	private static Component tile(String label, String value) {
+	private static Component tile(String label, String value, boolean numeric) {
 		Div tile = new Div();
 		tile.addClassNames("stat-tile", "aura-surface");
 		Div number = new Div();
-		number.addClassNames("stat-number", "mono");
+		number.addClassNames(numeric ? "stat-number" : "stat-text");
+		if (numeric) {
+			number.addClassName("mono");
+		}
 		number.setText(value);
 		Div caption = new Div();
 		caption.addClassName("stat-label");
@@ -161,10 +164,10 @@ public final class StatisticsView extends AppLayout {
 
 	private static Component section(String title, Component body) {
 		VerticalLayout section = new VerticalLayout();
+		section.addClassName("stat-section");
 		section.setPadding(false);
 		section.setSpacing(false);
 		H2 heading = new H2(title);
-		heading.getStyle().set("font-size", "1rem").set("margin", "var(--lumo-space-m) 0 var(--lumo-space-xs)");
 		section.add(heading, body);
 		return section;
 	}
@@ -210,7 +213,7 @@ public final class StatisticsView extends AppLayout {
 	private Component emptyState() {
 		VerticalLayout empty = new VerticalLayout();
 		empty.setAlignItems(FlexComponent.Alignment.CENTER);
-		empty.getStyle().set("padding", "var(--lumo-space-xl)");
+		empty.getStyle().set("padding", "var(--vaadin-padding-xl, 2rem)");
 		Span message = new Span("No projects generated yet — go make one!");
 		empty.add(message, new RouterLink("Open the generator", MainView.class));
 		return empty;
