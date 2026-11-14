@@ -9,13 +9,20 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.LongAdder;
 
@@ -35,8 +42,10 @@ import org.springframework.util.StringUtils;
  * for <em>both</em> the Vaadin UI and the CLI {@code /starter.zip} path, since
  * {@code InitializrUiService} and the web controller share the same
  * {@code ApplicationContext} as event publisher). Counters live in memory and are
- * snapshotted to a JSON file so they survive restarts. Numbers are scoped to this
- * deployment; they are meant to be interesting, not authoritative.
+ * periodically merged into a JSON file so they survive restarts. Each save adds only this
+ * instance's unsaved increments to what is on disk, so two instances overlapping during a
+ * restart do not overwrite each other's counts. Numbers are meant to be interesting, not
+ * authoritative.
  * <p>
  * Note: the UI's "Explore" (preview) action also generates a project and therefore also
  * emits an event, so counts include previews, not only downloads. That is intentional
@@ -57,9 +66,7 @@ public final class StatisticsService implements DisposableBean {
 
 	private static final String DIRECT_REFERRER = "direct";
 
-	// Persist after this many new generations (a debounce so hot paths do not hit disk on
-	// every request); a final flush also runs on shutdown via destroy().
-	private static final int SAVE_EVERY = 20;
+	private static final Duration DEFAULT_SAVE_INTERVAL = Duration.ofMinutes(1);
 
 	private static final long MILLIS_PER_DAY = 86_400_000L;
 
@@ -71,9 +78,17 @@ public final class StatisticsService implements DisposableBean {
 
 	private final Object saveLock = new Object();
 
-	private final AtomicLong total = new AtomicLong();
+	private final AtomicBoolean dirty = new AtomicBoolean();
 
-	private final AtomicLong sinceLastSave = new AtomicLong();
+	private final ScheduledExecutorService saver;
+
+	// What this instance last read from or wrote to the file (guarded by saveLock): the
+	// live counters minus this are the increments not yet saved.
+	private StatisticsSnapshot baseline = emptySnapshot();
+
+	private boolean savedOnce;
+
+	private final AtomicLong total = new AtomicLong();
 
 	private final Map<String, LongAdder> dependencies = new ConcurrentHashMap<>();
 
@@ -96,9 +111,26 @@ public final class StatisticsService implements DisposableBean {
 	private volatile long lastGeneratedEpochMs;
 
 	public StatisticsService(JsonMapper jsonMapper, String filePath) {
+		this(jsonMapper, filePath, DEFAULT_SAVE_INTERVAL);
+	}
+
+	StatisticsService(JsonMapper jsonMapper, String filePath, Duration saveInterval) {
 		this.jsonMapper = jsonMapper;
-		this.file = StringUtils.hasText(filePath) ? Path.of(filePath) : null;
+		this.file = StringUtils.hasText(filePath) ? Path.of(filePath).toAbsolutePath() : null;
 		load();
+		if (this.file != null) {
+			this.saver = Executors.newSingleThreadScheduledExecutor((task) -> {
+				Thread thread = new Thread(task, "statistics-saver");
+				thread.setDaemon(true);
+				return thread;
+			});
+			long millis = saveInterval.toMillis();
+			this.saver.scheduleWithFixedDelay(this::saveIfDirty, millis, millis, TimeUnit.MILLISECONDS);
+		}
+		else {
+			logger.info("No statistics file configured; statistics are kept in memory only");
+			this.saver = null;
+		}
 	}
 
 	@EventListener
@@ -118,7 +150,7 @@ public final class StatisticsService implements DisposableBean {
 				increment(this.dependencies, dep);
 			}
 		}
-		maybeSave();
+		this.dirty.set(true);
 	}
 
 	/**
@@ -130,7 +162,7 @@ public final class StatisticsService implements DisposableBean {
 	 */
 	public void recordArrival(String referer, String selfHost) {
 		increment(this.referrers, referrerHost(referer, selfHost));
-		maybeSave();
+		this.dirty.set(true);
 	}
 
 	public long total() {
@@ -247,36 +279,31 @@ public final class StatisticsService implements DisposableBean {
 		}
 	}
 
-	private void maybeSave() {
+	private void load() {
 		if (this.file == null) {
 			return;
 		}
-		if (this.sinceLastSave.incrementAndGet() >= SAVE_EVERY) {
-			this.sinceLastSave.set(0);
-			save();
-		}
-	}
-
-	private void load() {
-		if (this.file == null || !Files.exists(this.file)) {
-			return;
-		}
 		try {
-			StatisticsSnapshot snapshot = this.jsonMapper.readValue(Files.readString(this.file),
-					StatisticsSnapshot.class);
+			StatisticsSnapshot snapshot = read();
+			if (snapshot == null) {
+				logger.info("No statistics file at " + this.file + " yet, starting fresh");
+				return;
+			}
 			this.total.set(snapshot.total());
 			if (snapshot.countingSinceEpochMs() > 0) {
 				this.countingSinceEpochMs = snapshot.countingSinceEpochMs();
 			}
 			this.lastGeneratedEpochMs = snapshot.lastGeneratedEpochMs();
-			restore(this.dependencies, snapshot.dependencies());
-			restore(this.javaVersions, snapshot.javaVersions());
-			restore(this.bootVersions, snapshot.bootVersions());
-			restore(this.languages, snapshot.languages());
-			restore(this.buildSystems, snapshot.buildSystems());
-			restore(this.packaging, snapshot.packaging());
-			restore(this.uiActions, snapshot.uiActions());
-			restore(this.referrers, snapshot.referrers());
+			add(this.dependencies, snapshot.dependencies(), Map.of());
+			add(this.javaVersions, snapshot.javaVersions(), Map.of());
+			add(this.bootVersions, snapshot.bootVersions(), Map.of());
+			add(this.languages, snapshot.languages(), Map.of());
+			add(this.buildSystems, snapshot.buildSystems(), Map.of());
+			add(this.packaging, snapshot.packaging(), Map.of());
+			add(this.uiActions, snapshot.uiActions(), Map.of());
+			add(this.referrers, snapshot.referrers(), Map.of());
+			this.baseline = snapshot;
+			logger.info("Loaded statistics (" + snapshot.total() + " projects) from " + this.file);
 		}
 		catch (IOException | RuntimeException ex) {
 			// A missing/corrupt file must never stop the app; start fresh instead.
@@ -284,12 +311,17 @@ public final class StatisticsService implements DisposableBean {
 		}
 	}
 
-	private static void restore(Map<String, LongAdder> map, Map<String, Long> values) {
-		values.forEach((key, value) -> {
-			LongAdder adder = new LongAdder();
-			adder.add(value);
-			map.put(key, adder);
-		});
+	private StatisticsSnapshot read() throws IOException {
+		if (!Files.exists(this.file)) {
+			return null;
+		}
+		return this.jsonMapper.readValue(Files.readString(this.file), StatisticsSnapshot.class);
+	}
+
+	private void saveIfDirty() {
+		if (this.dirty.getAndSet(false)) {
+			save();
+		}
 	}
 
 	private void save() {
@@ -298,7 +330,10 @@ public final class StatisticsService implements DisposableBean {
 		}
 		synchronized (this.saveLock) {
 			try {
-				String json = this.jsonMapper.writeValueAsString(snapshot());
+				StatisticsSnapshot current = snapshot();
+				StatisticsSnapshot onDisk = readForMerge();
+				StatisticsSnapshot merged = merge(onDisk, current, this.baseline);
+				String json = this.jsonMapper.writeValueAsString(merged);
 				Path parent = this.file.getParent();
 				if (parent != null) {
 					Files.createDirectories(parent);
@@ -308,11 +343,99 @@ public final class StatisticsService implements DisposableBean {
 				Path tmp = this.file.resolveSibling(this.file.getFileName() + ".tmp");
 				Files.writeString(tmp, json);
 				Files.move(tmp, this.file, StandardCopyOption.REPLACE_EXISTING);
+				absorb(onDisk, this.baseline, merged);
+				this.baseline = merged;
+				if (!this.savedOnce) {
+					this.savedOnce = true;
+					logger.info("Saving statistics to " + this.file);
+				}
 			}
 			catch (IOException | RuntimeException ex) {
+				this.dirty.set(true);
 				logger.warn("Could not persist statistics to " + this.file, ex);
 			}
 		}
+	}
+
+	private StatisticsSnapshot readForMerge() {
+		try {
+			StatisticsSnapshot onDisk = read();
+			return (onDisk != null) ? onDisk : this.baseline;
+		}
+		catch (IOException | RuntimeException ex) {
+			logger.warn("Could not read statistics from " + this.file + ", overwriting it", ex);
+			return this.baseline;
+		}
+	}
+
+	// Counts other instances saved since our last sync (onDisk - baseline) are added to
+	// the live counters so this instance shows, and later saves, the combined numbers.
+	private void absorb(StatisticsSnapshot onDisk, StatisticsSnapshot base, StatisticsSnapshot merged) {
+		this.total.addAndGet(onDisk.total() - base.total());
+		this.countingSinceEpochMs = merged.countingSinceEpochMs();
+		this.lastGeneratedEpochMs = Math.max(this.lastGeneratedEpochMs, merged.lastGeneratedEpochMs());
+		add(this.dependencies, onDisk.dependencies(), base.dependencies());
+		add(this.javaVersions, onDisk.javaVersions(), base.javaVersions());
+		add(this.bootVersions, onDisk.bootVersions(), base.bootVersions());
+		add(this.languages, onDisk.languages(), base.languages());
+		add(this.buildSystems, onDisk.buildSystems(), base.buildSystems());
+		add(this.packaging, onDisk.packaging(), base.packaging());
+		add(this.uiActions, onDisk.uiActions(), base.uiActions());
+		add(this.referrers, onDisk.referrers(), base.referrers());
+	}
+
+	private static void add(Map<String, LongAdder> map, Map<String, Long> plus, Map<String, Long> minus) {
+		for (String key : keys(plus, minus)) {
+			long delta = plus.getOrDefault(key, 0L) - minus.getOrDefault(key, 0L);
+			if (delta != 0) {
+				map.computeIfAbsent(key, (k) -> new LongAdder()).add(delta);
+			}
+		}
+	}
+
+	static StatisticsSnapshot merge(StatisticsSnapshot onDisk, StatisticsSnapshot current, StatisticsSnapshot base) {
+		return new StatisticsSnapshot(onDisk.total() + current.total() - base.total(),
+				earliest(onDisk.countingSinceEpochMs(), current.countingSinceEpochMs()),
+				Math.max(onDisk.lastGeneratedEpochMs(), current.lastGeneratedEpochMs()),
+				merge(onDisk.dependencies(), current.dependencies(), base.dependencies()),
+				merge(onDisk.javaVersions(), current.javaVersions(), base.javaVersions()),
+				merge(onDisk.bootVersions(), current.bootVersions(), base.bootVersions()),
+				merge(onDisk.languages(), current.languages(), base.languages()),
+				merge(onDisk.buildSystems(), current.buildSystems(), base.buildSystems()),
+				merge(onDisk.packaging(), current.packaging(), base.packaging()),
+				merge(onDisk.uiActions(), current.uiActions(), base.uiActions()),
+				merge(onDisk.referrers(), current.referrers(), base.referrers()));
+	}
+
+	private static Map<String, Long> merge(Map<String, Long> onDisk, Map<String, Long> current,
+			Map<String, Long> base) {
+		Set<String> keys = keys(onDisk, current);
+		keys.addAll(base.keySet());
+		Map<String, Long> out = new LinkedHashMap<>();
+		for (String key : keys) {
+			long value = onDisk.getOrDefault(key, 0L) + current.getOrDefault(key, 0L) - base.getOrDefault(key, 0L);
+			if (value > 0) {
+				out.put(key, value);
+			}
+		}
+		return out;
+	}
+
+	private static Set<String> keys(Map<String, Long> first, Map<String, Long> second) {
+		Set<String> keys = new HashSet<>(first.keySet());
+		keys.addAll(second.keySet());
+		return keys;
+	}
+
+	private static long earliest(long first, long second) {
+		if (first <= 0) {
+			return second;
+		}
+		return (second <= 0) ? first : Math.min(first, second);
+	}
+
+	private static StatisticsSnapshot emptySnapshot() {
+		return new StatisticsSnapshot(0, 0, 0, null, null, null, null, null, null, null, null);
 	}
 
 	private StatisticsSnapshot snapshot() {
@@ -329,6 +452,9 @@ public final class StatisticsService implements DisposableBean {
 
 	@Override
 	public void destroy() {
+		if (this.saver != null) {
+			this.saver.shutdownNow();
+		}
 		save();
 	}
 
