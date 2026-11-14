@@ -4,7 +4,9 @@
 
 package io.spring.start.site.stats;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -106,6 +108,44 @@ class StatisticsServiceTests {
 		assertThat(reloaded.uiActionDistribution()).extracting(Count::id)
 			.containsExactlyInAnyOrder("generate", "explore");
 		assertThat(reloaded.referrerDistribution()).extracting(Count::id).containsExactly("news.ycombinator.com");
+	}
+
+	@Test
+	void overlappingInstancesDoNotOverwriteEachOther(@TempDir Path dir) {
+		Path file = dir.resolve("stats.json");
+		StatisticsService old = new StatisticsService(JsonMapper.builder().build(), file.toString());
+		old.onProjectGenerated(uiEvent("3.5.0", "jar", "generate", "web"));
+		old.destroy();
+
+		StatisticsService running = new StatisticsService(JsonMapper.builder().build(), file.toString());
+		StatisticsService next = new StatisticsService(JsonMapper.builder().build(), file.toString());
+		running.onProjectGenerated(uiEvent("3.5.0", "jar", "generate", "web"));
+		running.onProjectGenerated(uiEvent("3.5.0", "jar", "generate", "actuator"));
+		running.destroy();
+		next.onProjectGenerated(uiEvent("3.5.0", "war", "explore", "web"));
+		next.destroy();
+
+		StatisticsService reloaded = new StatisticsService(JsonMapper.builder().build(), file.toString());
+		assertThat(reloaded.total()).isEqualTo(4);
+		assertThat(reloaded.topDependencies(10)).first().satisfies((count) -> {
+			assertThat(count.id()).isEqualTo("web");
+			assertThat(count.count()).isEqualTo(3);
+		});
+		assertThat(reloaded.packagingDistribution()).extracting(Count::id).containsExactly("jar", "war");
+	}
+
+	@Test
+	void savesPeriodicallyWithoutShutdown(@TempDir Path dir) throws InterruptedException {
+		Path file = dir.resolve("stats.json");
+		StatisticsService service = new StatisticsService(JsonMapper.builder().build(), file.toString(),
+				Duration.ofMillis(50));
+		service.onProjectGenerated(uiEvent("3.5.0", "jar", "generate", "web"));
+		for (int i = 0; i < 100 && !Files.exists(file); i++) {
+			Thread.sleep(20);
+		}
+		assertThat(file).exists();
+		assertThat(new StatisticsService(JsonMapper.builder().build(), file.toString()).total()).isEqualTo(1);
+		service.destroy();
 	}
 
 	private static ProjectGeneratedEvent event(String type, String bootVersion, String javaVersion, String language,
