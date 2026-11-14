@@ -1,3 +1,7 @@
+# NOTE: production uses a jar deployment (see "Jar deployment" in README.adoc) — this
+# Dockerfile is an unmaintained alternative for running the same jar in a container, not
+# the deploy path.
+#
 # Builds and runs the start-site Spring Boot + Vaadin app (executable fat jar).
 # Build context is the repository ROOT so the multi-module reactor's parent POM resolves.
 # Multi-stage: build the Vaadin production bundle with Maven, run on a slim JRE.
