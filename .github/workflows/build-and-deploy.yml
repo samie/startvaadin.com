@@ -1,4 +1,6 @@
-name: Build and deploy
+# Deployment is a jar deployment done outside CI (see "Jar deployment" in README.adoc).
+# This workflow only verifies that main still builds the self-contained production jar.
+name: Build
 permissions:
   contents: read
 on:
@@ -13,7 +15,7 @@ env:
   START_SPRING_IO_TMPDIR: /tmp/start-spring-io-cache-2024-12-11
 jobs:
   build:
-    name: Build and deploy
+    name: Build production jar
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
@@ -34,32 +36,8 @@ jobs:
           key: test-repositories-${{ runner.os }}-${{ github.run_id }}
           restore-keys: test-repositories-${{ runner.os }}
 
-      - name: Cache node_modules
-        uses: actions/cache@v6
-        with:
-          path: start-client/node_modules
-          key: node-modules-${{ hashFiles('start-client/yarn.lock') }}
-
       - name: Build with Maven
-        env:
-          GOOGLE_TAGMANAGER_ID: ${{ vars.GOOGLE_TAGMANAGER_ID }}
-        run: ./mvnw --batch-mode --update-snapshots verify
-
-      - name: Set up Azure
-        uses: azure/login@a641126d1b8aa4d1fa005f4f92df94a3a4c4c906 # v3.1.0
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS_SPRING_ASA }}
-
-      - name: Set up Azure Spring Extension
-        run: az extension add --name spring
-
-      - name: Deploy
-        run: |
-          az spring app deploy \
-            --name start-spring-io \
-            --service spring-asa \
-            --resource-group spring-asa \
-            --artifact-path start-site/target/start-site-exec.jar
+        run: ./mvnw --batch-mode --update-snapshots -Pproduction verify
 
       - name: Send notification
         uses: ./.github/actions/send-notification

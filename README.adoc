@@ -88,39 +88,39 @@ purpose and is not particularly engineered to be easily extended.
 
 
 
-== Deploying to Cloud Foundry
+== Jar deployment
 
-If you are on a Mac and using https://brew.sh/[homebrew], install the Cloud Foundry
-CLI:
+The application is deployed as a plain runnable jar (no container image). The
+self-contained executable fat jar (`start-site-exec.jar`, with the Vaadin production
+bundle baked in) is all that runs; a container would only wrap the same jar around a JRE.
 
-[indent=0]
-----
-    $ brew install cloudfoundry-cli
-----
-
-Alternatively, download a suitable binary for your platform from
-https://console.run.pivotal.io/tools[Pivotal Web Services].
-
-You should ensure that the application name and URL (name and host values) are
-suitable for your environment before running `cf push`.
-
-First, make sure that you have <<building, built the application>>, then make sure first
-that the jar has been created:
+Build and run the production jar locally to verify it is self-contained:
 
 [indent=0]
 ----
-    $ cd start-site
-    $ ../mvnw package
+    $ ./mvnw -Pproduction -pl start-site -am -Dmaven.test.skip=true clean package
+    $ java -jar start-site/target/start-site-exec.jar
 ----
 
-The project creates a regular library jar and a repackaged archive that can be used to
-start the application with the `exec` classifier. Once the build as completed, you can
-push the application:
+`-Pproduction` runs the Vaadin `build-frontend` goal, which bakes the optimized frontend
+bundle into the jar. Without it the jar relies on the dev-mode frontend and must not be
+deployed.
 
-[indent=0]
-----
-    $ cf push your-start -p target/start-site-exec.jar
-----
+The jar is built locally and only the binary is shipped to the server, which runs it
+with `java -jar`. The runtime needs:
+
+* *Java 21* (Vaadin 25 needs a Java 21 runtime).
+* *Durable storage* mounted at the `statistics/` directory next to the jar, so generation
+statistics survive restarts.
+* `APPLICATION_STATISTICS_FILE=statistics/statistics.json`, a *relative* path that resolves
+into that mounted directory. (The default `/statistics/statistics.json` is an absolute
+path at the filesystem root, which is usually not writable, and must be overridden.)
+* `-XX:MaxRAMPercentage=75` as a JVM argument, for container-aware heap sizing.
+* `APPLICATION_PUBLIC_URL`, only if the public URL differs from the default.
+
+The app holds server-side Vaadin session state and keeps per-instance statistics, so it
+runs as a *single instance*: set min = max = 1 instance and disable autoscaling. Running
+multiple instances would require sticky sessions and a rethink of statistics storage.
 
 
 == License
