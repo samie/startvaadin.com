@@ -4,6 +4,7 @@
 
 package io.spring.start.site.ui;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -31,6 +32,11 @@ public final class VendorIcons {
 	private static final String SPRING_FALLBACK_SLUG = "spring";
 
 	private static final String SPRING_GROUP_PREFIX = "org.springframework";
+
+	private static final String VAADIN_FALLBACK_SLUG = "vaadin";
+
+	/** Group id prefixes of Vaadin modules and add-ons, which get the Vaadin icon. */
+	private static final List<String> VAADIN_GROUP_PREFIXES = List.of("com.vaadin", "org.vaadin", "in.virit");
 
 	private static final String ICON_CLASS_NAME = "dependency-icon";
 
@@ -121,6 +127,9 @@ public final class VendorIcons {
 		if (groupId != null && groupId.startsWith(SPRING_GROUP_PREFIX)
 				&& AVAILABLE_SLUGS.contains(SPRING_FALLBACK_SLUG)) {
 			return SPRING_FALLBACK_SLUG;
+		}
+		if (groupId != null && VAADIN_GROUP_PREFIXES.stream().anyMatch(groupId::startsWith)) {
+			return VAADIN_FALLBACK_SLUG;
 		}
 		return DEFAULT_SLUG;
 	}
