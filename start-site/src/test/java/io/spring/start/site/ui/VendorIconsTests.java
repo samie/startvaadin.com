@@ -65,6 +65,13 @@ class VendorIconsTests {
 	}
 
 	@Test
+	void vaadinModuleOrAddOnWithoutVendorIconFallsBackToVaadinSlug() {
+		assertThat(VendorIcons.resolveSlug(Dependency.withId("vaadin-webpush", "com.vaadin", "flow-webpush")))
+			.isEqualTo("vaadin");
+		assertThat(VendorIcons.resolveSlug(Dependency.withId("viritin", "in.virit", "viritin"))).isEqualTo("vaadin");
+	}
+
+	@Test
 	void unknownDependencyFallsBackToDefaultSlug() {
 		assertThat(VendorIcons.resolveSlug(Dependency.withId("some-unmapped-id"))).isEqualTo("openjdk");
 		Dependency oracle = Dependency.withId("oracle", "com.oracle.database.jdbc", "ojdbc11");
