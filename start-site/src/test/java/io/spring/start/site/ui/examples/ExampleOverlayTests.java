@@ -13,7 +13,7 @@ import org.junit.jupiter.api.io.TempDir;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Unit tests for {@link ExampleOverlay} path and {@code {{package}}} substitution.
+ * Unit tests for {@link ExampleOverlay} path and token substitution.
  */
 class ExampleOverlayTests {
 
@@ -21,7 +21,7 @@ class ExampleOverlayTests {
 
 	@Test
 	void helloWorldOverlayWritesViewWithSubstitutedPackage(@TempDir Path project) throws Exception {
-		this.overlay.apply(project, ExampleCatalog.find("helloworld"), "com.acme.app");
+		this.overlay.apply(project, ExampleCatalog.find("helloworld"), project("com.acme.app"));
 		Path view = project.resolve("src/main/java/com/acme/app/HelloView.java");
 		assertThat(view).isRegularFile();
 		assertThat(Files.readString(view)).contains("package com.acme.app;").contains("TextField").contains("Button");
@@ -29,7 +29,7 @@ class ExampleOverlayTests {
 
 	@Test
 	void crudOverlayWritesEntityRepositoryViewAndSeed(@TempDir Path project) throws Exception {
-		this.overlay.apply(project, ExampleCatalog.find("crud"), "com.acme.app");
+		this.overlay.apply(project, ExampleCatalog.find("crud"), project("com.acme.app"));
 		Path base = project.resolve("src/main/java/com/acme/app");
 		assertThat(base.resolve("Contact.java")).isRegularFile();
 		assertThat(base.resolve("ContactRepository.java")).isRegularFile();
@@ -39,8 +39,12 @@ class ExampleOverlayTests {
 
 	@Test
 	void mobileOverlayWritesPwaShell(@TempDir Path project) throws Exception {
-		this.overlay.apply(project, ExampleCatalog.find("mobile"), "x.y");
+		this.overlay.apply(project, ExampleCatalog.find("mobile"), project("x.y"));
 		assertThat(Files.readString(project.resolve("src/main/java/x/y/AppShell.java"))).contains("@PWA");
+	}
+
+	private static ExampleOverlay.Project project(String packageName) {
+		return new ExampleOverlay.Project(packageName, "Demo", "A demo project");
 	}
 
 }

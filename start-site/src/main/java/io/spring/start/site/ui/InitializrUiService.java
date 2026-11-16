@@ -218,7 +218,9 @@ public class InitializrUiService {
 		if (example != null) {
 			Path projectDirectory = StringUtils.hasText(model.getArtifactId())
 					? result.getRootDirectory().resolve(model.getArtifactId()) : result.getRootDirectory();
-			this.exampleOverlay.apply(projectDirectory, example, model.getPackageName());
+			String name = StringUtils.hasText(model.getName()) ? model.getName() : model.getArtifactId();
+			this.exampleOverlay.apply(projectDirectory, example,
+					new ExampleOverlay.Project(model.getPackageName(), name, model.getDescription()));
 		}
 		return result;
 	}
