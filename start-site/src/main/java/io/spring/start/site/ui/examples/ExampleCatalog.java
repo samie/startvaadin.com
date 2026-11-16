@@ -18,8 +18,9 @@ public final class ExampleCatalog {
 			new Example("crud", "CRUD App", "Grid and editor backed by JPA and an in-memory database.",
 					List.of("data-jpa", "h2")),
 			new Example("dashboard", "Dashboard", "Stat cards and progress bars on a responsive layout.", List.of()),
-			new Example("mobile", "Mobile App", "Mobile-first layout with tab navigation, installable as a PWA.",
-					List.of()));
+			new Example("mobile", "Mobile App",
+					"Bottom tabs, drill-down views and push notifications, installable as a PWA.",
+					List.of("vaadin-webpush")));
 
 	private ExampleCatalog() {
 	}

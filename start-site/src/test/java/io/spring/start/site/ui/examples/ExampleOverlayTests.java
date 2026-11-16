@@ -10,6 +10,8 @@ import java.nio.file.Path;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import org.springframework.core.io.ClassPathResource;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -40,7 +42,31 @@ class ExampleOverlayTests {
 	@Test
 	void mobileOverlayWritesPwaShell(@TempDir Path project) throws Exception {
 		this.overlay.apply(project, ExampleCatalog.find("mobile"), project("x.y"));
-		assertThat(Files.readString(project.resolve("src/main/java/x/y/AppShell.java"))).contains("@PWA");
+		assertThat(Files.readString(project.resolve("src/main/java/x/y/AppShell.java"))).contains("@PWA")
+			.contains("Aura.STYLESHEET");
+		assertThat(project.resolve("src/main/java/x/y/ItemView.java")).isRegularFile();
+		assertThat(project.resolve("src/main/java/x/y/ItemService.java")).isRegularFile();
+		assertThat(project.resolve("src/main/java/x/y/NotificationService.java")).isRegularFile();
+		assertThat(project.resolve("src/main/java/x/y/DemoNotificationSender.java")).isRegularFile();
+		assertThat(project.resolve("src/main/resources/META-INF/resources/styles.css")).isRegularFile();
+		assertThat(project.resolve("src/main/resources/META-INF/resources/nav-pending.js")).isRegularFile();
+	}
+
+	@Test
+	void mobileOverlayCopiesIconUnchanged(@TempDir Path project) throws Exception {
+		this.overlay.apply(project, ExampleCatalog.find("mobile"), project("x.y"));
+		byte[] original = new ClassPathResource("examples/mobile/src/main/resources/META-INF/resources/icons/icon.png")
+			.getContentAsByteArray();
+		assertThat(project.resolve("src/main/resources/META-INF/resources/icons/icon.png")).hasBinaryContent(original);
+	}
+
+	@Test
+	void mobileOverlayUsesProjectNameAndDescriptionForTheApp(@TempDir Path project) throws Exception {
+		this.overlay.apply(project, ExampleCatalog.find("mobile"),
+				new ExampleOverlay.Project("x.y", "Field Notes", "Notes from \"the field\"\nfor teams"));
+		assertThat(Files.readString(project.resolve("src/main/java/x/y/AppShell.java")))
+			.contains("name = \"Field Notes\"")
+			.contains("description = \"Notes from \\\"the field\\\" for teams\"");
 	}
 
 	private static ExampleOverlay.Project project(String packageName) {
