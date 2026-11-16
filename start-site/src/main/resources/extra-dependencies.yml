@@ -1,0 +1,46 @@
+# Dependencies offered on top of the start.spring.io catalog.
+#
+# Same format as the "initializr" section of application.yml, kept in a file of its own
+# so that the upstream catalog stays untouched. The entries are merged into the
+# Initializr metadata at startup and behave like any other dependency: they can be
+# picked in the UI, referenced by example templates, and are written to the generated
+# Maven or Gradle build. Their group names tell them apart from start.spring.io ones.
+#
+# Rules, checked at startup:
+# - extras live in groups of their own; a group name used upstream is an error
+# - an extra must not reuse the id of an upstream dependency
+#
+# Vaadin add-ons published to Maven Central need nothing more than coordinates and a
+# version. Add-ons published only to the Vaadin Directory also need
+# "repository: vaadin-addons".
+initializr:
+  env:
+    repositories:
+      vaadin-addons:
+        name: Vaadin Directory
+        url: https://maven.vaadin.com/vaadin-addons
+  dependencies:
+    - name: Vaadin Framework
+      content:
+        - name: Vaadin Web Push
+          id: vaadin-webpush
+          groupId: com.vaadin
+          artifactId: flow-webpush
+          description: Send push notifications to the browsers and installed PWAs of your Vaadin Flow application users.
+          bom: vaadin
+          compatibilityRange: "[4.1.0,4.2.0-M1)"
+          links:
+            - rel: reference
+              href: https://vaadin.com/docs/latest/flow/configuration/webpush
+    - name: Vaadin Add-ons
+      content:
+        - name: Viritin
+          id: viritin
+          groupId: in.virit
+          artifactId: viritin
+          version: 3.9.1
+          description: Productivity helpers for Vaadin Flow, including fluent component APIs, a bean validation form and an app framework.
+          compatibilityRange: "[4.1.0,4.2.0-M1)"
+          links:
+            - rel: reference
+              href: https://vaadin.com/directory/component/flow-viritin
