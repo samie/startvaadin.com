@@ -47,3 +47,6 @@ target
 /start-site/vite.generated.ts
 /start-site/src/main/frontend/generated/
 /start-site/src/main/bundles/
+
+# Local usage statistics (application.statistics.file)
+statistics/
