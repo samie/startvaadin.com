@@ -112,9 +112,9 @@ with `java -jar`. The runtime needs:
 * *Java 21* (Vaadin 25 needs a Java 21 runtime).
 * *Durable storage* mounted at the `statistics/` directory next to the jar, so generation
 statistics survive restarts.
-* `APPLICATION_STATISTICS_FILE=statistics/statistics.json`, a *relative* path that resolves
-into that mounted directory. (The default `/statistics/statistics.json` is an absolute
-path at the filesystem root, which is usually not writable, and must be overridden.)
+* The default `application.statistics.file` is `statistics/statistics.json`, relative to the
+working directory, so start the jar from the directory that contains `statistics/`.
+Override it with `APPLICATION_STATISTICS_FILE` to store the file elsewhere.
 * `-XX:MaxRAMPercentage=75` as a JVM argument, for container-aware heap sizing.
 * `APPLICATION_PUBLIC_URL`, only if the public URL differs from the default.
 
