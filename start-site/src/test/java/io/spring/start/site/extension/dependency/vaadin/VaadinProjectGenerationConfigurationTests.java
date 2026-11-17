@@ -87,6 +87,12 @@ class VaadinProjectGenerationConfigurationTests extends AbstractExtensionTests {
 	}
 
 	@Test
+	void mavenBuildWithVaadinAddsBrowserlessTestDependency() {
+		ProjectRequest request = createProjectRequest(BOOT_VERSION, "vaadin");
+		assertThat(mavenPom(request)).hasDependency("com.vaadin", "browserless-test-spring", null, "test");
+	}
+
+	@Test
 	void mavenBuildWithoutVaadinDoesNotAddProductionProfile() {
 		assertThat(mavenPom(createProjectRequest("data-jpa"))).doesNotHaveProfile("production");
 	}
@@ -101,7 +107,8 @@ class VaadinProjectGenerationConfigurationTests extends AbstractExtensionTests {
 			.resolve(Version.parse(request.getBootVersion()))
 			.getVersion();
 		assertThat(gradleBuild(request)).hasPlugin("com.vaadin", vaadinVersion)
-			.contains("developmentOnly 'com.vaadin:vaadin-dev'");
+			.contains("developmentOnly 'com.vaadin:vaadin-dev'")
+			.contains("testImplementation 'com.vaadin:browserless-test-spring'");
 
 	}
 

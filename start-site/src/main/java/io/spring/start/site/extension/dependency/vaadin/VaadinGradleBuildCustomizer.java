@@ -4,6 +4,7 @@
 
 package io.spring.start.site.extension.dependency.vaadin;
 
+import io.spring.initializr.generator.buildsystem.DependencyScope;
 import io.spring.initializr.generator.buildsystem.gradle.GradleBuild;
 import io.spring.initializr.generator.buildsystem.gradle.GradleDependency;
 import io.spring.initializr.generator.spring.build.BuildCustomizer;
@@ -34,6 +35,9 @@ class VaadinGradleBuildCustomizer implements BuildCustomizer<GradleBuild> {
 		build.dependencies()
 			.add("vaadin-dev",
 					GradleDependency.withCoordinates("com.vaadin", "vaadin-dev").configuration("developmentOnly"));
+		build.dependencies()
+			.add("browserless-test-spring", GradleDependency.withCoordinates("com.vaadin", "browserless-test-spring")
+				.scope(DependencyScope.TEST_COMPILE));
 	}
 
 }

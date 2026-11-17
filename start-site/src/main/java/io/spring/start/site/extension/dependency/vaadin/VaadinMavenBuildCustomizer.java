@@ -4,6 +4,7 @@
 
 package io.spring.start.site.extension.dependency.vaadin;
 
+import io.spring.initializr.generator.buildsystem.DependencyScope;
 import io.spring.initializr.generator.buildsystem.maven.MavenBuild;
 import io.spring.initializr.generator.buildsystem.maven.MavenDependency;
 import io.spring.initializr.generator.spring.build.BuildCustomizer;
@@ -21,6 +22,9 @@ class VaadinMavenBuildCustomizer implements BuildCustomizer<MavenBuild> {
 	public void customize(MavenBuild build) {
 		build.dependencies()
 			.add("vaadin-dev", MavenDependency.withCoordinates("com.vaadin", "vaadin-dev").optional(true));
+		build.dependencies()
+			.add("browserless-test-spring", MavenDependency.withCoordinates("com.vaadin", "browserless-test-spring")
+				.scope(DependencyScope.TEST_COMPILE));
 		build.plugins()
 			.add("com.vaadin", "vaadin-maven-plugin", (plugin) -> plugin.version("${vaadin.version}")
 				.execution("build-frontend", (execution) -> execution.goal("build-frontend")));
