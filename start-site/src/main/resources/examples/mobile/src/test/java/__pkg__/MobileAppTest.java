@@ -3,6 +3,8 @@ package {{package}};
 import com.vaadin.browserless.BrowserlessApplicationContext;
 import com.vaadin.browserless.BrowserlessUIContext;
 import com.vaadin.browserless.SpringBrowserlessApplicationContext;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -44,10 +46,17 @@ class MobileAppTest {
 	}
 
 	@Test
+	void userSpotsFeaturesByTheirIcons() {
+		assertEquals(iconName(VaadinIcon.BELL), iconOnCard("Push notifications"));
+		assertEquals(iconName(VaadinIcon.ADJUST), iconOnCard("Light and dark"));
+	}
+
+	@Test
 	void userOpensAFeatureToReadAboutIt() {
 		this.window.navigate("item/drill-down", ItemView.class);
 
 		assertEquals("Drill-down view", this.window.findH1().getText());
+		assertEquals(iconName(VaadinIcon.LEVEL_DOWN), iconByTitle());
 	}
 
 	@Test
@@ -57,6 +66,21 @@ class MobileAppTest {
 		this.window.findButton().withText("Save").click();
 
 		assertEquals("Profile saved", this.window.findNotification().getText());
+	}
+
+	private String iconOnCard(String title) {
+		Icon icon = (Icon) this.window.findCard()
+			.withCondition((card) -> title.equals(card.getTitleAsText()))
+			.getHeaderPrefix();
+		return icon.getIcon();
+	}
+
+	private String iconByTitle() {
+		return this.window.find(Icon.class, this.window.findH1().component()).single().getIcon();
+	}
+
+	private static String iconName(VaadinIcon icon) {
+		return icon.create().getIcon();
 	}
 
 }

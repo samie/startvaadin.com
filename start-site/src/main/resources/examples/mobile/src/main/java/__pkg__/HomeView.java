@@ -5,6 +5,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Section;
+import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -27,11 +28,18 @@ public class HomeView extends VerticalLayout {
 		Card card = new Card();
 		card.setTitle(item.title());
 		card.setSubtitle(item.summary());
+		card.setHeaderPrefix(icon(item));
 
 		RouterLink link = new RouterLink(ItemView.class, item.id());
 		link.addClassName("card-link");
 		link.add(card);
 		return link;
+	}
+
+	private Icon icon(Item item) {
+		Icon icon = item.icon().create();
+		icon.addClassNames("aura-surface", "feature-icon");
+		return icon;
 	}
 
 }

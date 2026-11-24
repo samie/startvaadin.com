@@ -8,6 +8,8 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
 import jakarta.annotation.PreDestroy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.springframework.stereotype.Service;
 
@@ -17,6 +19,8 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class DemoNotificationSender {
+
+	private static final Logger logger = LoggerFactory.getLogger(DemoNotificationSender.class);
 
 	private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
@@ -36,6 +40,10 @@ public class DemoNotificationSender {
 		try {
 			String time = LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm"));
 			this.notifications.notifyAll("Demo notification", "Sent at " + time + ". The next one comes in 1–3 minutes.");
+		}
+		catch (RuntimeException ex) {
+			// The scheduler would swallow it silently
+			logger.error("Sending the demo notification failed", ex);
 		}
 		finally {
 			scheduleNext();

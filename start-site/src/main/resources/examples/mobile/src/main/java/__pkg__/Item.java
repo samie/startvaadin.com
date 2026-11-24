@@ -1,5 +1,7 @@
 package {{package}};
 
-public record Item(String id, String title, String summary, String description) {
+import com.vaadin.flow.component.icon.VaadinIcon;
+
+public record Item(String id, VaadinIcon icon, String title, String summary, String description) {
 
 }

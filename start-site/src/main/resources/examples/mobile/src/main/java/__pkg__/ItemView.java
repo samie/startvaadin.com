@@ -2,9 +2,11 @@ package {{package}};
 
 import java.util.Optional;
 
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Header;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.BeforeEvent;
@@ -19,7 +21,11 @@ public class ItemView extends VerticalLayout implements HasUrlParameter<String>,
 
 	private final ItemService items;
 
-	private final H1 title = new H1();
+	private final Icon icon = new Icon();
+
+	private final Text name = new Text("");
+
+	private final H1 title = new H1(this.icon, this.name);
 
 	private final Paragraph summary = new Paragraph();
 
@@ -33,11 +39,12 @@ public class ItemView extends VerticalLayout implements HasUrlParameter<String>,
 		back.getElement().setAttribute("aria-label", "Back to Home");
 		back.addClassName("aura-surface");
 
-		Header header = new Header(back, title);
+		Header header = new Header(back, this.title);
 		header.addClassName("view-header");
 
-		summary.addClassName("secondary");
-		add(header, summary, description);
+		this.icon.addClassNames("aura-surface", "feature-icon");
+		this.summary.addClassName("secondary");
+		add(header, this.summary, this.description);
 	}
 
 	@Override
@@ -47,14 +54,15 @@ public class ItemView extends VerticalLayout implements HasUrlParameter<String>,
 			event.rerouteToError(NotFoundException.class);
 			return;
 		}
-		title.setText(item.get().title());
-		summary.setText(item.get().summary());
-		description.setText(item.get().description());
+		this.icon.setIcon(item.get().icon());
+		this.name.setText(item.get().title());
+		this.summary.setText(item.get().summary());
+		this.description.setText(item.get().description());
 	}
 
 	@Override
 	public String getPageTitle() {
-		return title.getText();
+		return this.name.getText();
 	}
 
 }

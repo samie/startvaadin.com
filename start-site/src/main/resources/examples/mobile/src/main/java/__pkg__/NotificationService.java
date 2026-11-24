@@ -1,6 +1,7 @@
 package {{package}};
 
 import java.math.BigInteger;
+import java.net.URI;
 import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
@@ -9,6 +10,7 @@ import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.spec.ECGenParameterSpec;
 import java.util.Base64;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
@@ -121,22 +123,43 @@ public class NotificationService {
 	}
 
 	public void notifyAll(String title, String body) {
-		this.subscriptions.values().forEach((subscription) -> send(subscription, new WebPushMessage(title, body)));
+		List<WebPushSubscription> recipients = List.copyOf(this.subscriptions.values());
+		if (recipients.isEmpty()) {
+			logger.info("Not sending \"{}\": no browser has turned notifications on", title);
+			return;
+		}
+		WebPushMessage message = new WebPushMessage(title, body);
+		long sent = recipients.stream().filter((subscription) -> send(subscription, message)).count();
+		logger.info("Sent \"{}\" to {} of {} subscribers", title, sent, recipients.size());
 	}
 
 	private void store(WebPushSubscription subscription) {
 		this.subscriptions.put(subscription.endpoint(), subscription);
 	}
 
-	private void send(WebPushSubscription subscription, WebPushMessage message) {
+	private boolean send(WebPushSubscription subscription, WebPushMessage message) {
 		try {
 			this.webPush.sendNotification(subscription, message);
+			return true;
 		}
 		catch (WebPushException ex) {
-			// The browser unsubscribed or the subscription expired
-			logger.info("Removing a push subscription that no longer works: {}", ex.getMessage());
-			this.subscriptions.remove(subscription.endpoint());
+			if (ex.getCause() != null) {
+				// The push service could not be reached; the subscription may still work
+				logger.warn("Could not send \"{}\" through {}: {}", message.title(), pushService(subscription),
+						ex.getCause().toString());
+			}
+			else {
+				// The push service answered 404 or 410: the browser unsubscribed or the subscription expired
+				logger.info("Removing a subscription that {} no longer accepts", pushService(subscription));
+				this.subscriptions.remove(subscription.endpoint());
+			}
+			return false;
 		}
+	}
+
+	// The browser vendor's push service, such as web.push.apple.com, without the secret part of the address
+	private static String pushService(WebPushSubscription subscription) {
+		return URI.create(subscription.endpoint()).getHost();
 	}
 
 	private static KeyPair generateKeyPair() {

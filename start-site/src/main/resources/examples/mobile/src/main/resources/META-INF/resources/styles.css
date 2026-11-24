@@ -208,6 +208,16 @@ section > h2 {
   color: var(--vaadin-text-color-secondary);
 }
 
+/* Each feature's icon, on its card and by its title: a small tile tinted with the accent colour */
+.feature-icon {
+  box-sizing: content-box;
+  padding: var(--vaadin-padding-s);
+  border: 1px solid var(--aura-accent-border-color);
+  border-radius: var(--vaadin-radius-m);
+  background: var(--aura-accent-surface);
+  color: var(--aura-accent-text-color);
+}
+
 /*
   Sub-view header: a round glass back button and a centred title that stay at
   the top while the content scrolls under them. The grid keeps the title centred
@@ -229,6 +239,12 @@ section > h2 {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.view-header .feature-icon {
+  padding: var(--vaadin-padding-xs);
+  margin-inline-end: var(--vaadin-gap-s);
+  vertical-align: middle;
 }
 
 /* The back button carries the aura-surface class, which lets it set its own surface level */
