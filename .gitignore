@@ -50,3 +50,6 @@ target
 
 # Local usage statistics (application.statistics.file)
 statistics/
+
+# Claude Code local files
+.claude/
