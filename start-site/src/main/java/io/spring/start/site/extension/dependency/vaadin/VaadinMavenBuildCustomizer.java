@@ -9,6 +9,7 @@ import io.spring.initializr.generator.buildsystem.DependencyScope;
 import io.spring.initializr.generator.buildsystem.maven.MavenBuild;
 import io.spring.initializr.generator.buildsystem.maven.MavenDependency;
 import io.spring.initializr.generator.spring.build.BuildCustomizer;
+import io.spring.initializr.generator.version.VersionReference;
 
 /**
  * A {@link BuildCustomizer} that adds a production profile to enable Vaadin's production
@@ -23,6 +24,11 @@ class VaadinMavenBuildCustomizer implements BuildCustomizer<MavenBuild> {
 	public void customize(MavenBuild build) {
 		build.dependencies()
 			.add("vaadin-dev", MavenDependency.withCoordinates("com.vaadin", "vaadin-dev").optional(true));
+		build.dependencies()
+			.add("dev-tunnel",
+					MavenDependency.withCoordinates("org.parttio", "dev-tunnel")
+						.version(VersionReference.ofValue(VaadinDevTunnel.VERSION))
+						.optional(true));
 		build.dependencies()
 			.add("browserless-test-spring", MavenDependency.withCoordinates("com.vaadin", "browserless-test-spring")
 				.scope(DependencyScope.TEST_COMPILE));

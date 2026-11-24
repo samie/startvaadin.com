@@ -10,6 +10,7 @@ import io.spring.initializr.generator.buildsystem.gradle.GradleBuild;
 import io.spring.initializr.generator.buildsystem.gradle.GradleDependency;
 import io.spring.initializr.generator.spring.build.BuildCustomizer;
 import io.spring.initializr.generator.version.Version;
+import io.spring.initializr.generator.version.VersionReference;
 import io.spring.initializr.metadata.InitializrMetadata;
 
 /**
@@ -36,6 +37,11 @@ class VaadinGradleBuildCustomizer implements BuildCustomizer<GradleBuild> {
 		build.dependencies()
 			.add("vaadin-dev",
 					GradleDependency.withCoordinates("com.vaadin", "vaadin-dev").configuration("developmentOnly"));
+		build.dependencies()
+			.add("dev-tunnel",
+					GradleDependency.withCoordinates("org.parttio", "dev-tunnel")
+						.version(VersionReference.ofValue(VaadinDevTunnel.VERSION))
+						.configuration("developmentOnly"));
 		build.dependencies()
 			.add("browserless-test-spring", GradleDependency.withCoordinates("com.vaadin", "browserless-test-spring")
 				.scope(DependencyScope.TEST_COMPILE));

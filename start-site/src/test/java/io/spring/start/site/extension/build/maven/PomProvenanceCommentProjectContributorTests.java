@@ -25,11 +25,13 @@ class PomProvenanceCommentProjectContributorTests extends AbstractExtensionTests
 	private static final String COMMENT = "<!-- Project from https://pro.startvaadin.com/ -->";
 
 	@Test
-	void provenanceCommentIsAddedRightAfterXmlDeclaration() throws IOException {
+	void provenanceCommentIsAddedInsideProjectElement() throws IOException {
 		ProjectRequest request = createProjectRequest("web");
 		Path pom = generateProject(request).getProjectDirectory().resolve("pom.xml");
 		String content = Files.readString(pom);
-		assertThat(content).startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + COMMENT + "\n<project ");
+		assertThat(content).containsOnlyOnce(COMMENT);
+		int projectStartTagEnd = content.indexOf('>', content.indexOf("<project "));
+		assertThat(content.substring(projectStartTagEnd + 1)).startsWith("\n\t" + COMMENT + "\n\t<modelVersion>");
 	}
 
 	@Test

@@ -15,9 +15,8 @@ import org.springframework.core.Ordered;
 
 /**
  * A {@link ProjectContributor} that adds a provenance comment to the generated
- * {@code pom.xml}. The Maven build model has no API to emit a top-level comment, so this
- * runs after {@code pom.xml} has been written and inserts the comment right after the XML
- * declaration.
+ * {@code pom.xml}. The Maven build model has no API to emit comments, so this runs after
+ * {@code pom.xml} has been written and inserts the comment into it.
  *
  * @author Sami Ekblad
  */
@@ -35,11 +34,11 @@ class PomProvenanceCommentProjectContributor implements ProjectContributor {
 		if (content.contains(COMMENT)) {
 			return;
 		}
-		int newline = content.indexOf('\n');
+		int project = content.indexOf("<project");
+		int startTagEnd = (project >= 0) ? content.indexOf('>', project) : -1;
 		String result;
-		if (newline >= 0 && content.startsWith("<?xml")) {
-			// Insert right after the XML declaration line.
-			result = content.substring(0, newline + 1) + COMMENT + "\n" + content.substring(newline + 1);
+		if (startTagEnd >= 0) {
+			result = content.substring(0, startTagEnd + 1) + "\n\t" + COMMENT + content.substring(startTagEnd + 1);
 		}
 		else {
 			result = COMMENT + "\n" + content;

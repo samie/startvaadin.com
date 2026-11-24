@@ -88,6 +88,19 @@ class VaadinProjectGenerationConfigurationTests extends AbstractExtensionTests {
 	}
 
 	@Test
+	void mavenBuildWithVaadinAddsDevTunnelAsOptionalDependency() {
+		ProjectRequest request = createProjectRequest(BOOT_VERSION, "vaadin");
+		assertThat(mavenPom(request)).containsIgnoringWhitespaces("""
+				<dependency>
+					<groupId>org.parttio</groupId>
+					<artifactId>dev-tunnel</artifactId>
+					<version>%s</version>
+					<optional>true</optional>
+				</dependency>
+				""".formatted(VaadinDevTunnel.VERSION));
+	}
+
+	@Test
 	void mavenBuildWithVaadinAddsBrowserlessTestDependency() {
 		ProjectRequest request = createProjectRequest(BOOT_VERSION, "vaadin");
 		assertThat(mavenPom(request)).hasDependency("com.vaadin", "browserless-test-spring", null, "test");
@@ -109,6 +122,7 @@ class VaadinProjectGenerationConfigurationTests extends AbstractExtensionTests {
 			.getVersion();
 		assertThat(gradleBuild(request)).hasPlugin("com.vaadin", vaadinVersion)
 			.contains("developmentOnly 'com.vaadin:vaadin-dev'")
+			.contains("developmentOnly 'org.parttio:dev-tunnel:" + VaadinDevTunnel.VERSION + "'")
 			.contains("testImplementation 'com.vaadin:browserless-test-spring'");
 
 	}
