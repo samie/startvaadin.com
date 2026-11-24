@@ -12,6 +12,8 @@ public class NotificationToggle extends Switch {
 	public NotificationToggle(NotificationService notifications) {
 		super("Notifications");
 		this.notifications = notifications;
+		// Until the browser has told whether it is subscribed
+		setEnabled(false);
 		addValueChangeListener((event) -> {
 			if (!event.isFromClient()) {
 				return;
@@ -32,12 +34,12 @@ public class NotificationToggle extends Switch {
 		UI ui = attachEvent.getUI();
 		this.notifications.checkSupport(ui, (problem) -> {
 			if (problem != null) {
-				setEnabled(false);
 				setHelperText(problem);
 				return;
 			}
 			this.notifications.isSubscribed(ui, (subscribed) -> {
 				setValue(subscribed);
+				setEnabled(true);
 				if (subscribed) {
 					this.notifications.restore(ui);
 				}
@@ -46,14 +48,11 @@ public class NotificationToggle extends Switch {
 	}
 
 	private void subscribe(UI ui) {
-		this.notifications.isBlocked(ui, (blocked) -> {
-			if (blocked) {
+		this.notifications.subscribe(ui, (problem) -> {
+			if (problem != null) {
 				setValue(false);
-				Notification.show("Notifications are blocked for this site. Allow them in the browser settings.");
 			}
-			else {
-				this.notifications.subscribe(ui);
-			}
+			Notification.show((problem != null) ? problem : "Notifications are on. The first one arrives within minutes.");
 		});
 	}
 

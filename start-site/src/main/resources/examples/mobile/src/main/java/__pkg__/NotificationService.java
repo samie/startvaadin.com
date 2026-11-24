@@ -38,6 +38,8 @@ public class NotificationService {
 
 	private final WebPush webPush;
 
+	private final String publicKey;
+
 	NotificationService(@Value("${vapid.public-key:}") String publicKey,
 			@Value("${vapid.private-key:}") String privateKey,
 			@Value("${vapid.subject:mailto:admin@example.com}") String subject) {
@@ -56,6 +58,7 @@ public class NotificationService {
 					+ "or set vapid.public-key and vapid.private-key to keep the keys.");
 		}
 		this.webPush = new WebPush(publicKey, privateKey, subject);
+		this.publicKey = publicKey;
 	}
 
 	/**
@@ -77,12 +80,35 @@ public class NotificationService {
 		this.webPush.subscriptionExists(ui, callback::accept);
 	}
 
-	public void isBlocked(UI ui, Consumer<Boolean> callback) {
-		this.webPush.isNotificationDenied(ui, callback::accept);
-	}
-
-	public void subscribe(UI ui) {
-		this.webPush.subscribe(ui, this::store);
+	/**
+	 * Subscribes this browser, then tells why that failed, or {@code null} if it worked.
+	 * The browser side runs here rather than in {@link WebPush#subscribe}, which reports
+	 * every browser failure as a server error: a dismissed permission prompt, a service
+	 * worker that is still installing or failed to, or an unreachable push service.
+	 */
+	public void subscribe(UI ui, Consumer<String> callback) {
+		ui.getPage().executeJs("""
+				try {
+				  if (await Notification.requestPermission() !== 'granted') {
+				    return 'Notifications are blocked for this site. Allow them in the browser settings.';
+				  }
+				  // The service worker that @PWA registers receives the notifications
+				  const timeout = new Promise((resolve) => setTimeout(resolve, 20000));
+				  const registration = await Promise.race([navigator.serviceWorker.ready, timeout]);
+				  if (!registration) {
+				    return 'The service worker has not started. Reload the page and try again.';
+				  }
+				  await registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: $0 });
+				  return null;
+				} catch (error) {
+				  return 'Notifications could not be turned on: ' + error.message;
+				}
+				""", this.publicKey).then(String.class, (problem) -> {
+			if (problem == null) {
+				restore(ui);
+			}
+			callback.accept(problem);
+		});
 	}
 
 	// Picks up a subscription the browser still has but this server has forgotten

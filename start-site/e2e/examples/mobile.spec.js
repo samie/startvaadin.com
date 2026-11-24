@@ -21,3 +21,16 @@ test('mobile app shows the bottom tab bar on a phone', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'Profile' })).toBeVisible();
   expect(errors, 'browser console errors').toEqual([]);
 });
+
+test('turning on notifications answers with a message, not a server error', async ({ page, context, baseURL }) => {
+  await context.grantPermissions(['notifications'], { origin: baseURL });
+  const errors = await openApp(page);
+  await page.getByRole('link', { name: 'Profile' }).first().click();
+  const toggle = page.getByRole('switch', { name: 'Notifications' });
+  await expect(toggle).toBeEnabled();
+  await toggle.click();
+  // Playwright's browser context is incognito-like, without push, so the message tells why subscribing failed
+  await expect(page.locator('vaadin-notification-card')).toContainText('Notifications');
+  const appErrors = errors.filter((error) => !error.includes('Push API in incognito mode'));
+  expect(appErrors, 'browser console errors').toEqual([]);
+});
