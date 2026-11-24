@@ -28,7 +28,7 @@ initializr:
           artifactId: flow-webpush
           description: Send push notifications to the browsers and installed PWAs of your Vaadin Flow application users.
           bom: vaadin
-          compatibilityRange: "[4.1.0,4.2.0-M1)"
+          compatibilityRange: "[4.1.0,4.3.0-M1)"
           links:
             - rel: reference
               href: https://vaadin.com/docs/latest/flow/configuration/webpush
