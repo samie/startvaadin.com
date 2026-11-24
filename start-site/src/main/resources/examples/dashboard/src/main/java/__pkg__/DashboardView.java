@@ -1,7 +1,7 @@
 package {{package}};
 
+import com.vaadin.flow.component.card.Card;
 import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -17,9 +17,10 @@ public class DashboardView extends VerticalLayout {
 		add(progress("CPU", 0.42), progress("Memory", 0.67), progress("Disk", 0.23));
 	}
 
-	private VerticalLayout stat(String label, String value) {
-		VerticalLayout card = new VerticalLayout(new H3(value), new Span(label));
-		card.setSpacing(false);
+	private Card stat(String label, String value) {
+		Card card = new Card();
+		card.setTitle(value);
+		card.setSubtitle(label);
 		return card;
 	}
 

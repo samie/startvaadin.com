@@ -1,8 +1,11 @@
 package {{package}};
 
+import java.util.List;
+
 import com.vaadin.browserless.BrowserlessApplicationContext;
 import com.vaadin.browserless.BrowserlessUIContext;
 import com.vaadin.browserless.SpringBrowserlessApplicationContext;
+import com.vaadin.flow.component.card.Card;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -10,7 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
 class DashboardViewTest {
@@ -35,9 +38,9 @@ class DashboardViewTest {
 
 	@Test
 	void userSeesTheKeyFigures() {
-		assertTrue(this.window.findSpan().withText("Users").exists());
-		assertTrue(this.window.findSpan().withText("Sessions").exists());
-		assertTrue(this.window.findSpan().withText("Revenue").exists());
+		List<String> figures = this.window.findCard().components().stream().map(Card::getTitleAsText).toList();
+
+		assertEquals(List.of("1,204", "357", "$12.8k"), figures);
 	}
 
 }
