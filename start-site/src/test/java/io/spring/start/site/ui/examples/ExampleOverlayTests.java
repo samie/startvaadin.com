@@ -30,6 +30,14 @@ class ExampleOverlayTests {
 	}
 
 	@Test
+	void overlayWritesTestSourcesWithSubstitutedPackage(@TempDir Path project) throws Exception {
+		this.overlay.apply(project, ExampleCatalog.find("helloworld"), project("com.acme.app"));
+		Path test = project.resolve("src/test/java/com/acme/app/HelloViewTest.java");
+		assertThat(test).isRegularFile();
+		assertThat(Files.readString(test)).contains("package com.acme.app;");
+	}
+
+	@Test
 	void crudOverlayWritesEntityRepositoryViewAndSeed(@TempDir Path project) throws Exception {
 		this.overlay.apply(project, ExampleCatalog.find("crud"), project("com.acme.app"));
 		Path base = project.resolve("src/main/java/com/acme/app");
