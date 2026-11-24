@@ -5,10 +5,12 @@
 
 package io.spring.start.site.extension.build.maven;
 
+import io.spring.initializr.generator.buildsystem.maven.MavenBuild;
 import io.spring.initializr.generator.buildsystem.maven.MavenBuildSystem;
 import io.spring.initializr.generator.condition.ConditionalOnBuildSystem;
 import io.spring.initializr.generator.project.ProjectDescription;
 import io.spring.initializr.generator.project.ProjectGenerationConfiguration;
+import io.spring.initializr.generator.spring.build.BuildCustomizer;
 
 import org.springframework.context.annotation.Bean;
 
@@ -30,6 +32,12 @@ class MavenProjectGenerationConfiguration {
 	@Bean
 	PomProvenanceCommentProjectContributor pomProvenanceCommentProjectContributor() {
 		return new PomProvenanceCommentProjectContributor();
+	}
+
+	// A plain "mvn" runs the app
+	@Bean
+	BuildCustomizer<MavenBuild> springBootRunDefaultGoalCustomizer() {
+		return (build) -> build.settings().defaultGoal("spring-boot:run");
 	}
 
 }
