@@ -2,15 +2,15 @@ package {{package}};
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.checkbox.Switch;
 import com.vaadin.flow.component.notification.Notification;
 
-public class NotificationToggle extends Checkbox {
+public class NotificationToggle extends Switch {
 
 	private final NotificationService notifications;
 
 	public NotificationToggle(NotificationService notifications) {
-		super("Send me notifications");
+		super("Notifications");
 		this.notifications = notifications;
 		addValueChangeListener((event) -> {
 			if (!event.isFromClient()) {
