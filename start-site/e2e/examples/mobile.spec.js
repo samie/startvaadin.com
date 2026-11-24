@@ -22,6 +22,28 @@ test('mobile app shows the bottom tab bar on a phone', async ({ page }) => {
   expect(errors, 'browser console errors').toEqual([]);
 });
 
+test('on a small phone, a feature page shows its header parts side by side and its Markdown text', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 667 });
+  const errors = await openApp(page);
+  await page.locator('vaadin-card', { hasText: 'Installable app' }).click();
+  const header = page.locator('.view-header');
+  const parts = [
+    header.getByRole('link', { name: 'Back to Home' }),
+    header.locator('vaadin-icon.feature-icon'),
+    header.getByRole('heading', { name: 'Installable app' }),
+    header.getByText('Add it to the home screen'),
+  ];
+  const boxes = await Promise.all(parts.map((part) => part.boundingBox()));
+  const overlap = (a, b) => a.x < b.x + b.width && b.x < a.x + a.width && a.y < b.y + b.height && b.y < a.y + a.height;
+  for (let i = 0; i < boxes.length; i++) {
+    for (let j = i + 1; j < boxes.length; j++) {
+      expect(overlap(boxes[i], boxes[j]), `header parts ${i} and ${j} overlap`).toBe(false);
+    }
+  }
+  await expect(page.locator('vaadin-markdown code', { hasText: '@PWA' })).toBeVisible();
+  expect(errors, 'browser console errors').toEqual([]);
+});
+
 test('turning on notifications answers with a message, not a server error', async ({ page, context, baseURL }) => {
   await context.grantPermissions(['notifications'], { origin: baseURL });
   const errors = await openApp(page);

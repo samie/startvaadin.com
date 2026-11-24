@@ -2,12 +2,13 @@ package {{package}};
 
 import java.util.Optional;
 
-import com.vaadin.flow.component.Text;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
-import com.vaadin.flow.component.html.Header;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.markdown.Markdown;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.HasDynamicTitle;
@@ -23,13 +24,11 @@ public class ItemView extends VerticalLayout implements HasUrlParameter<String>,
 
 	private final Icon icon = new Icon();
 
-	private final Text name = new Text("");
-
-	private final H1 title = new H1(this.icon, this.name);
+	private final H1 title = new H1();
 
 	private final Paragraph summary = new Paragraph();
 
-	private final Paragraph description = new Paragraph();
+	private final Markdown description = new Markdown();
 
 	public ItemView(ItemService items) {
 		this.items = items;
@@ -39,12 +38,16 @@ public class ItemView extends VerticalLayout implements HasUrlParameter<String>,
 		back.getElement().setAttribute("aria-label", "Back to Home");
 		back.addClassName("aura-surface");
 
-		Header header = new Header(back, this.title);
-		header.addClassName("view-header");
-
 		this.icon.addClassNames("aura-surface", "feature-icon");
 		this.summary.addClassName("secondary");
-		add(header, this.summary, this.description);
+
+		// One row: back button, icon, and the title with the summary under it, which wraps
+		HorizontalLayout header = new HorizontalLayout(back, this.icon, new Div(this.title, this.summary));
+		header.setAlignItems(Alignment.CENTER);
+		header.setFlexShrink(0, back, this.icon);
+		header.setWidthFull();
+		header.addClassName("view-header");
+		add(header, this.description);
 	}
 
 	@Override
@@ -55,14 +58,14 @@ public class ItemView extends VerticalLayout implements HasUrlParameter<String>,
 			return;
 		}
 		this.icon.setIcon(item.get().icon());
-		this.name.setText(item.get().title());
+		this.title.setText(item.get().title());
 		this.summary.setText(item.get().summary());
-		this.description.setText(item.get().description());
+		this.description.setContent(item.get().description());
 	}
 
 	@Override
 	public String getPageTitle() {
-		return this.name.getText();
+		return this.title.getText();
 	}
 
 }

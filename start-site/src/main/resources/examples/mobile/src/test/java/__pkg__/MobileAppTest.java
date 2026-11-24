@@ -1,5 +1,7 @@
 package {{package}};
 
+import java.util.List;
+
 import com.vaadin.browserless.BrowserlessApplicationContext;
 import com.vaadin.browserless.BrowserlessUIContext;
 import com.vaadin.browserless.SpringBrowserlessApplicationContext;
@@ -14,6 +16,7 @@ import org.springframework.context.ApplicationContext;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 class MobileAppTest {
@@ -56,7 +59,9 @@ class MobileAppTest {
 		this.window.navigate("item/drill-down", ItemView.class);
 
 		assertEquals("Drill-down view", this.window.findH1().getText());
-		assertEquals(iconName(VaadinIcon.LEVEL_DOWN), iconByTitle());
+		assertTrue(iconsOnPage().contains(iconName(VaadinIcon.LEVEL_DOWN)));
+		assertEquals(this.items.findById("drill-down").orElseThrow().description(),
+				this.window.findMarkdown().getContent());
 	}
 
 	@Test
@@ -75,8 +80,8 @@ class MobileAppTest {
 		return icon.getIcon();
 	}
 
-	private String iconByTitle() {
-		return this.window.find(Icon.class, this.window.findH1().component()).single().getIcon();
+	private List<String> iconsOnPage() {
+		return this.window.findInView(Icon.class).all().stream().map(Icon::getIcon).toList();
 	}
 
 	private static String iconName(VaadinIcon icon) {
