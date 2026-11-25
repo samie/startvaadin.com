@@ -6,6 +6,8 @@
 #   3. run the template's Playwright smoke spec, which also takes a screenshot to
 #      target/example-projects/<id>.png. With --update-screenshots it replaces the
 #      catalog image in src/main/resources/META-INF/resources/images/examples/ instead.
+#      The light/dark and phone review shots (<id>-light.png, <id>-dark.png,
+#      <id>-phone.png, <id>-phone-dark.png) always go to target/example-projects/.
 #
 # Usage: check.sh <id>[,<id>...]|all [--skip-build] [--update-screenshots]
 set -euo pipefail
@@ -19,6 +21,7 @@ ids=${1:?usage: check.sh <id>[,<id>...]|all [--skip-build] [--update-screenshots
 shift
 skip_build=false
 export SCREENSHOT_DIR="$OUTPUT"
+export REVIEW_SCREENSHOT_DIR="$OUTPUT"
 for arg in "$@"; do
   case "$arg" in
     --skip-build) skip_build=true ;;

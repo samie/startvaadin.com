@@ -17,7 +17,8 @@ application class and its test), src/main/resources (except application.*), and
 src/main/frontend (except generated/). Files missing from the project are removed
 from the template. In text files the project's package, description and name (from
 its pom) go back to `{{package}}`, `{{description}}` and `{{name}}`; binary files are
-copied as-is.
+copied as-is. The AppShell.java and styles.css that the generator adds to every
+Vaadin project are synced only when the template has its own or they were edited.
 """
 
 import difflib
@@ -30,6 +31,11 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[3]
 OUTPUT = REPO / "start-site/target/example-projects"
 EXAMPLES = REPO / "start-site/src/main/resources/examples"
+# What the generator adds to every Vaadin project (VaadinAppShellProjectContributor)
+GENERATED = {
+    "src/main/java/__pkg__/AppShell.java": REPO / "start-site/src/main/resources/vaadin/app-shell/AppShell.java",
+    "src/main/resources/META-INF/resources/styles.css": REPO / "start-site/src/main/resources/vaadin/app-shell/styles.css",
+}
 EXCLUDED_RESOURCES = re.compile(r"^application(-[^/]*)?\.(properties|ya?ml)$|^vaadin-featureflags\.properties$")
 
 
@@ -135,6 +141,9 @@ def main():
 
     _, files = staged(template_id)
     existing = {p.relative_to(template).as_posix() for p in template.rglob("*") if p.is_file()}
+    for target, source in GENERATED.items():
+        if target not in existing and files.get(target) == source.read_text():
+            del files[target]
     changed = False
     for target in sorted(existing | files.keys()):
         old = read(template / target) if target in existing else ""
