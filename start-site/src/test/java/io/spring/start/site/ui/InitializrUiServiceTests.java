@@ -12,6 +12,7 @@ import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import io.spring.initializr.metadata.DefaultMetadataElement;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -130,6 +131,13 @@ class InitializrUiServiceTests {
 		InitializrFormModel model = this.service.defaultFormModel();
 		Map<String, String> files = this.service.explore(model);
 		assertThat(files.keySet()).anyMatch((key) -> key.endsWith("/AppShell.java"));
+	}
+
+	@Test
+	void javaVersionsStartAtJava21() {
+		assertThat(this.service.getJavaVersions()).extracting(DefaultMetadataElement::getId)
+			.contains("21")
+			.doesNotContain("17");
 	}
 
 	@Test

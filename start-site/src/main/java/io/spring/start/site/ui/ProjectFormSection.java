@@ -72,6 +72,7 @@ public class ProjectFormSection extends VerticalLayout {
 		RadioButtonGroup<String> packaging = radioGroup("Packaging", this.service.getPackagings());
 		RadioButtonGroup<String> javaVersion = radioGroup("Java", this.service.getJavaVersions());
 		javaVersion.addClassName("mono");
+		javaVersion.setHelperText("Vaadin recommends Java " + InitializrFormModel.MINIMUM_JAVA_VERSION + " or later");
 		List<DefaultMetadataElement> formats = this.service.getConfigurationFileFormats();
 		FormLayout options = responsiveForm(packaging, javaVersion);
 		RadioButtonGroup<String> configFile = null;

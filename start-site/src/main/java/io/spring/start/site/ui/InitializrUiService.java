@@ -84,7 +84,11 @@ public class InitializrUiService {
 	}
 
 	public List<DefaultMetadataElement> getJavaVersions() {
-		return getMetadata().getJavaVersions().getContent();
+		return getMetadata().getJavaVersions()
+			.getContent()
+			.stream()
+			.filter((version) -> !InitializrFormModel.isBelowMinimum(version.getId()))
+			.toList();
 	}
 
 	public List<DefaultMetadataElement> getConfigurationFileFormats() {
@@ -105,7 +109,7 @@ public class InitializrUiService {
 		model.setLanguage("java");
 		model.setBootVersion(defaultId(getBootVersions(), null));
 		model.setPackaging("jar");
-		model.setJavaVersion("21");
+		model.setJavaVersion(String.valueOf(InitializrFormModel.MINIMUM_JAVA_VERSION));
 		model.setConfigurationFileFormat("properties");
 		model.setGroupId("org.vaadin.example");
 		model.setArtifactId("vaadin-demo");
