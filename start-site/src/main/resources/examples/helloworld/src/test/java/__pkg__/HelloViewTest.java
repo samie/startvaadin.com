@@ -3,6 +3,7 @@ package {{package}};
 import com.vaadin.browserless.BrowserlessApplicationContext;
 import com.vaadin.browserless.BrowserlessUIContext;
 import com.vaadin.browserless.SpringBrowserlessApplicationContext;
+import com.vaadin.flow.component.Key;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,6 +38,14 @@ class HelloViewTest {
 	void userIsGreetedByName() {
 		this.window.findTextField().withLabel("Your name").setValue("Ada");
 		this.window.findButton().withText("Say hello").click();
+
+		assertEquals("Hello, Ada", this.window.findNotification().getText());
+	}
+
+	@Test
+	void userIsGreetedByPressingEnter() {
+		this.window.findTextField().withLabel("Your name").setValue("Ada");
+		this.window.fireShortcut(Key.ENTER);
 
 		assertEquals("Hello, Ada", this.window.findNotification().getText());
 	}
