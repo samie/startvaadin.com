@@ -11,6 +11,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 class ContactViewTest {
@@ -45,8 +47,21 @@ class ContactViewTest {
 		this.window.findTextField().withLabel("Email").setValue("jane@example.com");
 		this.window.findButton().withText("Save").click();
 
+		assertEquals("Contact saved", this.window.findNotification().getText());
 		assertEquals(2, this.window.findGrid(Contact.class).size());
 		assertEquals(2, this.repository.count());
+	}
+
+	@Test
+	void userCannotSaveAContactWithAnInvalidEmail() {
+		this.window.findTextField().withLabel("First name").setValue("Jane");
+		this.window.findTextField().withLabel("Last name").setValue("Roe");
+		this.window.findTextField().withLabel("Email").setValue("jane.example.com");
+		this.window.findButton().withText("Save").click();
+
+		assertTrue(this.window.findTextField().withLabel("Email").component().isInvalid());
+		assertEquals(1, this.window.findGrid(Contact.class).size());
+		assertEquals(1, this.repository.count());
 	}
 
 	@Test
@@ -63,8 +78,18 @@ class ContactViewTest {
 		this.window.findGrid(Contact.class).select(0);
 		this.window.findButton().withText("Delete").click();
 
+		assertEquals("Contact deleted", this.window.findNotification().getText());
 		assertEquals(0, this.window.findGrid(Contact.class).size());
 		assertEquals(0, this.repository.count());
+	}
+
+	@Test
+	void userCanDeleteOnlyAfterSelectingAContact() {
+		assertFalse(this.window.findButton().withText("Delete").component().isEnabled());
+
+		this.window.findGrid(Contact.class).select(0);
+
+		assertTrue(this.window.findButton().withText("Delete").component().isEnabled());
 	}
 
 	private void givenContact(String firstName, String lastName, String email) {
