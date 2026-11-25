@@ -29,7 +29,7 @@ import static org.assertj.core.api.Assertions.contentOf;
 class VaadinAgentConfigProjectContributorTests extends AbstractExtensionTests {
 
 	private static final List<String> VENDORED_SKILLS = List.of("aura-theme", "vaadin-frontend-design",
-			"vaadin-form-layout");
+			"vaadin-form-layout", "vaadin-browserless-testing", "vaadin-usage-review");
 
 	@Test
 	void agentConfigIsContributedWithVaadin() {

@@ -1,0 +1,5 @@
+/*
+  The app's own styles, loaded after the Aura theme by AppShell. Use Aura and Vaadin
+  style properties (such as --aura-accent-color, --vaadin-gap-m, --vaadin-text-color)
+  instead of fixed colours, so both the light and the dark colour scheme keep working.
+*/

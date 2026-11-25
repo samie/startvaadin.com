@@ -8,7 +8,9 @@ package io.spring.start.site.extension.dependency.vaadin;
 import io.spring.initializr.generator.buildsystem.gradle.GradleBuildSystem;
 import io.spring.initializr.generator.buildsystem.maven.MavenBuildSystem;
 import io.spring.initializr.generator.condition.ConditionalOnBuildSystem;
+import io.spring.initializr.generator.condition.ConditionalOnLanguage;
 import io.spring.initializr.generator.condition.ConditionalOnRequestedDependency;
+import io.spring.initializr.generator.language.java.JavaLanguage;
 import io.spring.initializr.generator.project.ProjectDescription;
 import io.spring.initializr.generator.spring.properties.ApplicationPropertiesCustomizer;
 import io.spring.initializr.generator.spring.scm.git.GitIgnoreCustomizer;
@@ -53,6 +55,12 @@ class VaadinProjectGenerationConfiguration {
 	@Bean
 	VaadinAgentConfigProjectContributor vaadinAgentConfigProjectContributor() {
 		return new VaadinAgentConfigProjectContributor();
+	}
+
+	@Bean
+	@ConditionalOnLanguage(JavaLanguage.ID)
+	VaadinAppShellProjectContributor vaadinAppShellProjectContributor(ProjectDescription description) {
+		return new VaadinAppShellProjectContributor(description.getPackageName());
 	}
 
 }

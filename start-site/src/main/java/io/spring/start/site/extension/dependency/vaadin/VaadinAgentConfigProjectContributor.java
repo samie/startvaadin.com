@@ -21,8 +21,9 @@ import org.springframework.util.StreamUtils;
  * A {@link ProjectContributor} that adds agent configuration (Claude Code and OpenAI
  * Codex) to generated Vaadin projects. It configures the public Vaadin MCP server,
  * per-agent instruction files, and Vaadin's official agent skills ({@code aura-theme},
- * {@code vaadin-frontend-design} and {@code vaadin-form-layout}, vendored from
- * {@code vaadin/agent-skills} 0.2.1) so the project is ready to use with AI coding agents
+ * {@code vaadin-frontend-design}, {@code vaadin-form-layout},
+ * {@code vaadin-browserless-testing} and {@code vaadin-usage-review}, vendored from
+ * {@code vaadin/agent-skills} 0.3.0) so the project is ready to use with AI coding agents
  * without manual setup.
  *
  * @author Sami Ekblad

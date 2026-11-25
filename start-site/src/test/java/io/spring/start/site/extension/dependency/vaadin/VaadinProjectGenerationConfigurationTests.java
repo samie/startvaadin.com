@@ -156,4 +156,30 @@ class VaadinProjectGenerationConfigurationTests extends AbstractExtensionTests {
 			.doesNotContain("vaadin.launch-browser=true");
 	}
 
+	@Test
+	void javaProjectWithVaadinGetsAppShellWithAuraAndColorScheme() {
+		ProjectRequest request = createProjectRequest(BOOT_VERSION, "vaadin");
+		assertThat(generateProject(request)).textFile("src/main/java/com/example/demo/AppShell.java")
+			.contains("package com.example.demo;")
+			.contains("@StyleSheet(Aura.STYLESHEET)")
+			.contains("@StyleSheet(\"styles.css\")")
+			.contains("@ColorScheme(ColorScheme.Value.LIGHT_DARK)")
+			.contains("implements AppShellConfigurator");
+		assertThat(generateProject(request)).containsFiles("src/main/resources/META-INF/resources/styles.css");
+	}
+
+	@Test
+	void kotlinProjectWithVaadinDoesNotGetJavaAppShell() {
+		ProjectRequest request = createProjectRequest(BOOT_VERSION, "vaadin");
+		request.setLanguage("kotlin");
+		assertThat(generateProject(request)).doesNotContainFiles("src/main/java/com/example/demo/AppShell.java",
+				"src/main/kotlin/com/example/demo/AppShell.java");
+	}
+
+	@Test
+	void projectWithoutVaadinDoesNotGetAppShell() {
+		assertThat(generateProject(createProjectRequest("data-jpa")))
+			.doesNotContainFiles("src/main/java/com/example/demo/AppShell.java");
+	}
+
 }

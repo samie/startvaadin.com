@@ -112,6 +112,27 @@ class InitializrUiServiceTests {
 	}
 
 	@Test
+	void mobileExampleReplacesTheGeneratedAppShellWithItsPwaOne() {
+		InitializrFormModel model = this.service.defaultFormModel();
+		model.setExampleId("mobile");
+		Map<String, String> files = this.service.explore(model);
+		String appShell = files.entrySet()
+			.stream()
+			.filter((entry) -> entry.getKey().endsWith("/AppShell.java"))
+			.map(Map.Entry::getValue)
+			.findFirst()
+			.orElseThrow();
+		assertThat(appShell).contains("@PWA(").contains("@ColorScheme(ColorScheme.Value.LIGHT_DARK)");
+	}
+
+	@Test
+	void noExampleSelectedStillGetsTheGeneratedAppShell() {
+		InitializrFormModel model = this.service.defaultFormModel();
+		Map<String, String> files = this.service.explore(model);
+		assertThat(files.keySet()).anyMatch((key) -> key.endsWith("/AppShell.java"));
+	}
+
+	@Test
 	void dependencyGroupsIncludeAllEntriesAndTagCompatibility() {
 		InitializrFormModel model = this.service.defaultFormModel();
 		var groups = this.service.dependencyGroups(model.getBootVersion());

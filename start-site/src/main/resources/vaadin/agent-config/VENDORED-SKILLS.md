@@ -6,11 +6,12 @@ agent-skills project and copied into every generated Vaadin project (under both
 
 - Source: https://github.com/vaadin/agent-skills
 - Plugin: `vaadin-skills`
-- Version: 0.2.1
-- Branch/commit: `main` @ `21caf0ac474ecf3bc0b44ac1027d651b4e95b7d6`
+- Version: 0.3.0
+- Branch/commit: `main` @ `c0645a9fe3770ce30a86167bf265c4ed105ad2d4`
 - License: Apache-2.0
 
-Skills vendored: `aura-theme`, `vaadin-frontend-design`, `vaadin-form-layout`.
+Skills vendored: `aura-theme`, `vaadin-frontend-design`, `vaadin-form-layout`,
+`vaadin-browserless-testing`, `vaadin-usage-review`.
 
 ## Updating
 
