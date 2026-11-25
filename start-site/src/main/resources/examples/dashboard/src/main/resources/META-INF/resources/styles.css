@@ -1,0 +1,18 @@
+/*
+  The app's own styles, loaded after the Aura theme by AppShell. Use Aura and Vaadin
+  style properties (such as --aura-accent-color, --vaadin-gap-m, --vaadin-text-color)
+  instead of fixed colours, so both the light and the dark colour scheme keep working.
+*/
+
+/* App-specific measures, the only fixed values in this file */
+html {
+  /* Narrowest key-figure card before the grid drops a column */
+  --app-stat-card-min-width: 14rem;
+}
+
+/* As many key-figure columns as fit, one full-width column on a phone. No media queries. */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(var(--app-stat-card-min-width), 100%), 1fr));
+  gap: var(--vaadin-gap-m);
+}
