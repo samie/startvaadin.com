@@ -1,6 +1,6 @@
 // @ts-check
 const { test, expect, chromium, webkit, devices } = require('@playwright/test');
-const { openApp, finish } = require('./helpers');
+const { openApp, finish, checkColorSchemes, checkPhone, pickAppearance } = require('./helpers');
 
 test('mobile app lists features, opens one and reaches profile', async ({ page }) => {
   const errors = await openApp(page);
@@ -19,6 +19,30 @@ test('mobile app shows the bottom tab bar on a phone', async ({ page }) => {
   const errors = await openApp(page);
   await page.getByRole('link', { name: 'Profile' }).click();
   await expect(page.getByRole('heading', { name: 'Profile' })).toBeVisible();
+  expect(errors, 'browser console errors').toEqual([]);
+});
+
+test('the Appearance setting on Profile switches between light, dark and the system setting', async ({ page }) => {
+  const errors = await openApp(page);
+  await page.locator('vaadin-side-nav-item', { hasText: 'Profile' }).click();
+  await expect(page.getByRole('heading', { name: 'Profile' })).toBeVisible();
+  await checkColorSchemes(page, errors, 'mobile');
+});
+
+test('on a phone, the app reads well in light and dark', async ({ page }) => {
+  await openApp(page);
+  await checkPhone(page, 'mobile');
+});
+
+test('on a phone, the Appearance options open where the tab bar does not cover them', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const errors = await openApp(page);
+  await page.getByRole('link', { name: 'Profile' }).click();
+  await expect(page.getByRole('heading', { name: 'Profile' })).toBeVisible();
+  // pickAppearance clicks the option, which fails if the tab bar would receive the tap
+  await pickAppearance(page, 'Dark');
+  await pickAppearance(page, 'System');
+  await expect(page.locator('.tab-bar')).toBeVisible();
   expect(errors, 'browser console errors').toEqual([]);
 });
 

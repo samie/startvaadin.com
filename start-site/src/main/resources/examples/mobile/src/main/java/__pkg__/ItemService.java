@@ -38,7 +38,8 @@ public class ItemService {
 					"""),
 			new Item("appearance", VaadinIcon.ADJUST, "Light and dark", "Follows the system, or your choice", """
 					Colours come from Aura theme properties, so both schemes work without extra CSS.
-					**Profile** has a setting for trying them out.
+					`@ColorScheme` on `AppShell` follows the system; *Appearance* on **Profile**
+					(`ColorSchemeSelect`) switches this tab to light or dark.
 					"""),
 			new Item("installable", VaadinIcon.PLUS_SQUARE_O, "Installable app", "Add it to the home screen", """
 					`@PWA` on `AppShell` makes the app installable and registers the service worker,
