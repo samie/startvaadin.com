@@ -37,6 +37,7 @@ import io.spring.start.site.stats.StatisticsService;
 import io.spring.start.site.ui.examples.Example;
 import io.spring.start.site.ui.examples.ExampleCatalog;
 import io.spring.start.site.ui.examples.ExampleOverlay;
+import io.spring.start.site.ui.examples.ExampleProjectGenerationInvoker;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.util.StringUtils;
@@ -55,11 +56,15 @@ public class InitializrUiService {
 
 	private final ProjectGenerationInvoker<ProjectRequest> invoker;
 
+	private final ProjectGenerationInvoker<ProjectRequest> exampleInvoker;
+
 	private final ExampleOverlay exampleOverlay = new ExampleOverlay();
 
 	public InitializrUiService(InitializrMetadataProvider metadataProvider, ApplicationContext applicationContext) {
 		this.metadataProvider = metadataProvider;
 		this.invoker = new ProjectGenerationInvoker<>(applicationContext,
+				new DefaultProjectRequestToDescriptionConverter());
+		this.exampleInvoker = new ExampleProjectGenerationInvoker(applicationContext,
 				new DefaultProjectRequestToDescriptionConverter());
 	}
 
@@ -177,7 +182,7 @@ public class InitializrUiService {
 			return zip(result.getRootDirectory());
 		}
 		finally {
-			this.invoker.cleanTempFiles(result.getRootDirectory());
+			cleanTempFiles(result.getRootDirectory());
 		}
 	}
 
@@ -193,7 +198,7 @@ public class InitializrUiService {
 			return walkAsText(result.getRootDirectory());
 		}
 		finally {
-			this.invoker.cleanTempFiles(result.getRootDirectory());
+			cleanTempFiles(result.getRootDirectory());
 		}
 	}
 
@@ -219,7 +224,8 @@ public class InitializrUiService {
 			dependencies.addAll(example.dependencies());
 		}
 		request.setDependencies(new ArrayList<>(dependencies));
-		ProjectGenerationResult result = this.invoker.invokeProjectStructureGeneration(request);
+		ProjectGenerationInvoker<ProjectRequest> generator = (example != null) ? this.exampleInvoker : this.invoker;
+		ProjectGenerationResult result = generator.invokeProjectStructureGeneration(request);
 		if (example != null) {
 			Path projectDirectory = StringUtils.hasText(model.getArtifactId())
 					? result.getRootDirectory().resolve(model.getArtifactId()) : result.getRootDirectory();
@@ -228,6 +234,12 @@ public class InitializrUiService {
 					new ExampleOverlay.Project(model.getPackageName(), name, model.getDescription()));
 		}
 		return result;
+	}
+
+	private void cleanTempFiles(Path root) {
+		// Each invoker only knows its own temporary files; the other one ignores the path
+		this.invoker.cleanTempFiles(root);
+		this.exampleInvoker.cleanTempFiles(root);
 	}
 
 	private byte[] zip(Path root) {

@@ -14,6 +14,8 @@ import java.util.zip.ZipInputStream;
 
 import io.spring.initializr.metadata.DefaultMetadataElement;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -112,6 +114,36 @@ class InitializrUiServiceTests {
 		assertThat(files.keySet()).noneMatch((key) -> key.endsWith("/HelloView.java"));
 	}
 
+	@ParameterizedTest
+	@ValueSource(strings = { "helloworld", "crud", "dashboard", "mobile" })
+	void everyExampleProjectGetsTheVaadinDirectoryRepository(String exampleId) {
+		InitializrFormModel model = this.service.defaultFormModel();
+		model.setExampleId(exampleId);
+		assertThat(pomOf(this.service.explore(model))).contains("<id>vaadin-addons</id>")
+			.contains("<url>https://maven.vaadin.com/vaadin-addons</url>");
+	}
+
+	@Test
+	void gradleExampleProjectGetsTheVaadinDirectoryRepository() {
+		InitializrFormModel model = this.service.defaultFormModel();
+		model.setType("gradle-project");
+		model.setExampleId("helloworld");
+		String build = this.service.explore(model)
+			.entrySet()
+			.stream()
+			.filter((entry) -> entry.getKey().endsWith("/build.gradle"))
+			.map(Map.Entry::getValue)
+			.findFirst()
+			.orElseThrow();
+		assertThat(build).contains("https://maven.vaadin.com/vaadin-addons");
+	}
+
+	@Test
+	void projectWithoutExampleHasNoVaadinDirectoryRepository() {
+		InitializrFormModel model = this.service.defaultFormModel();
+		assertThat(pomOf(this.service.explore(model))).doesNotContain("vaadin-addons");
+	}
+
 	@Test
 	void mobileExampleReplacesTheGeneratedAppShellWithItsPwaOne() {
 		InitializrFormModel model = this.service.defaultFormModel();
@@ -182,6 +214,15 @@ class InitializrUiServiceTests {
 			}
 		}
 		return entries;
+	}
+
+	private static String pomOf(Map<String, String> files) {
+		return files.entrySet()
+			.stream()
+			.filter((entry) -> entry.getKey().endsWith("/pom.xml"))
+			.map(Map.Entry::getValue)
+			.findFirst()
+			.orElseThrow();
 	}
 
 }

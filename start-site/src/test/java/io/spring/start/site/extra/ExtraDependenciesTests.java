@@ -42,6 +42,10 @@ class ExtraDependenciesTests {
 		Dependency viritin = metadata.getDependencies().get("viritin");
 		assertThat(viritin).isNotNull();
 		assertThat(viritin.getVersion()).isNotBlank();
+		Dependency svgVisualizations = metadata.getDependencies().get("svg-visualizations");
+		assertThat(svgVisualizations).isNotNull();
+		assertThat(svgVisualizations.getGroupId()).isEqualTo("in.virit");
+		assertThat(svgVisualizations.getVersion()).isNotBlank();
 		assertThat(metadata.getConfiguration().getEnv().getRepositories()).containsKey("vaadin-addons");
 		assertThat(metadata.getDependencies().getContent()).extracting(DependencyGroup::getName)
 			.contains("Web", "Vaadin Framework", "Vaadin Add-ons");
