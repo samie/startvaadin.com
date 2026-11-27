@@ -8,6 +8,8 @@
 #      catalog image in src/main/resources/META-INF/resources/images/examples/ instead.
 #      The light/dark and phone review shots (<id>-light.png, <id>-dark.png,
 #      <id>-phone.png, <id>-phone-dark.png) always go to target/example-projects/.
+#      The same view is also saved at 2x to docs/templates/<id>.png, the screenshot
+#      shown in the repository README; commit it with the template change.
 #
 # Usage: check.sh <id>[,<id>...]|all [--skip-build] [--update-screenshots]
 set -euo pipefail

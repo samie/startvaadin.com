@@ -62,7 +62,9 @@ start-site/e2e/examples/check.sh crud --skip-build   # reuse the last generated 
 ```
 
 Each `<id>.spec.js` runs against the generated app (`EXAMPLE_BASE_URL`) and saves a 640×400
-screenshot to `start-site/target/example-projects/<id>.png`. Add
+screenshot to `start-site/target/example-projects/<id>.png`. It also writes the same view at
+2x (2560×1600) to `docs/templates/<id>.png`, the image shown in the repository README:
+commit it together with the template change. Add
 `--update-screenshots` to write the catalog card images instead (they are hand-made illustrations).
 
 To polish a template, edit the generated project in `start-site/target/example-projects/<id>/`,

@@ -1,10 +1,14 @@
 // @ts-check
+const fs = require('fs');
 const path = require('path');
 const { expect } = require('@playwright/test');
 
 const SCREENSHOTS = process.env.SCREENSHOT_DIR || path.resolve(__dirname, '../../target/example-projects');
 // The light/dark and phone shots are for review only and never replace a catalog image
 const REVIEW_SCREENSHOTS = process.env.REVIEW_SCREENSHOT_DIR || path.resolve(__dirname, '../../target/example-projects');
+// The high-resolution shots shown in the repository README, committed with the template
+const README_SCREENSHOTS = process.env.README_SCREENSHOT_DIR || path.resolve(__dirname, '../../../docs/templates');
+const README_SCALE = 2;
 
 /**
  * Open the generated app's root route, collecting browser console errors.
@@ -32,6 +36,38 @@ async function openApp(page) {
 async function finish(page, errors, id) {
   expect(errors, 'browser console errors').toEqual([]);
   await page.screenshot({ path: path.join(SCREENSHOTS, `${id}.png`) });
+  await readmeScreenshot(page, id);
+}
+
+/**
+ * Write the template's README screenshot, docs/templates/<id>.png: the same view as
+ * the gate screenshot, rendered at README_SCALE device pixels per CSS pixel so it
+ * stays sharp on GitHub. The pixel ratio is switched through the DevTools protocol
+ * (Chromium only) and restored afterwards, so the page keeps its state and layout.
+ * @param {import('@playwright/test').Page} page
+ * @param {string} id template id
+ */
+async function readmeScreenshot(page, id) {
+  const viewport = page.viewportSize();
+  if (!viewport) {
+    return;
+  }
+  const session = await page.context().newCDPSession(page);
+  const metrics = (deviceScaleFactor) => session.send('Emulation.setDeviceMetricsOverride',
+    { width: viewport.width, height: viewport.height, deviceScaleFactor, mobile: false });
+  const original = await page.evaluate(() => window.devicePixelRatio);
+  try {
+    await metrics(README_SCALE);
+    await page.waitForFunction((scale) => window.devicePixelRatio === scale, README_SCALE);
+    // Captured over the protocol: page.screenshot() would scale back to Playwright's own pixel ratio
+    const { data } = await session.send('Page.captureScreenshot', { format: 'png' });
+    fs.mkdirSync(README_SCREENSHOTS, { recursive: true });
+    fs.writeFileSync(path.join(README_SCREENSHOTS, `${id}.png`), Buffer.from(data, 'base64'));
+  }
+  finally {
+    await metrics(original);
+    await session.detach();
+  }
 }
 
 /**

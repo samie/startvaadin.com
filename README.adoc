@@ -11,6 +11,48 @@ The following modules are available:
 * `start-site`: server infrastructure, metadata configuration, and the Vaadin UI
 * `start-site-verification`: tests to verify the validity of the metadata
 
+[[templates]]
+== UI templates
+
+Besides an empty project, the site offers ready-made UI templates as a starting point.
+Pick one on the site, or open its direct link, and the generated project contains
+the template's views, tests and the dependencies it needs. These screenshots show each
+template running as generated.
+
+=== Hello World
+
+A view with a text field and a button.
+Link: https://pro.startvaadin.com/template/helloworld
+
+image::docs/templates/helloworld.png[Hello World template,link="docs/templates/helloworld.png"]
+
+=== CRUD App
+
+Master-detail contact list with a validated editor, backed by JPA and an in-memory
+database.
+Link: https://pro.startvaadin.com/template/crud
+
+image::docs/templates/crud.png[CRUD App template,link="docs/templates/crud.png"]
+
+=== JVM Dashboard
+
+Live JVM metrics delivered with Push, with trend charts and status gauges.
+Link: https://pro.startvaadin.com/template/dashboard
+
+image::docs/templates/dashboard.png[JVM Dashboard template,link="docs/templates/dashboard.png"]
+
+=== Mobile App
+
+Bottom tabs, drill-down views and push notifications, installable as a PWA.
+Link: https://pro.startvaadin.com/template/mobile
+
+image::docs/templates/mobile.png[Mobile App template,link="docs/templates/mobile.png"]
+
+The screenshots are written by the template test gate
+(`start-site/e2e/examples/check.sh <id>`, see link:start-site/e2e/README.md[the e2e
+README]) every time it runs, so a template change and its updated screenshot go in the
+same commit.
+
 [[using]]
 == Using
 There is a link:USING.adoc[dedicated page] that describes how you can interact with the
