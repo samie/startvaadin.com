@@ -10,6 +10,7 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.LongStream;
 
 import io.spring.initializr.web.project.ProjectGeneratedEvent;
 import io.spring.initializr.web.project.WebProjectRequest;
@@ -109,6 +110,27 @@ class StatisticsServiceTests {
 		assertThat(reloaded.uiActionDistribution()).extracting(Count::id)
 			.containsExactlyInAnyOrder("generate", "explore");
 		assertThat(reloaded.referrerDistribution()).extracting(Count::id).containsExactly("news.ycombinator.com");
+	}
+
+	@Test
+	void countsGenerationsPerHour() {
+		StatisticsService service = new StatisticsService(JsonMapper.builder().build(), null);
+		assertThat(service.generationsPerHour(24)).hasSize(24).containsOnly(0L);
+		service.onProjectGenerated(uiEvent("3.5.0", "jar", "generate", "web"));
+		service.onProjectGenerated(uiEvent("3.5.0", "jar", "explore", "web"));
+		// Sum rather than the last slot, so a run across an hour boundary still passes
+		assertThat(LongStream.of(service.generationsPerHour(24)).sum()).isEqualTo(2);
+	}
+
+	@Test
+	void persistsHourlyCounts(@TempDir Path dir) {
+		Path file = dir.resolve("stats.json");
+		StatisticsService first = new StatisticsService(JsonMapper.builder().build(), file.toString());
+		first.onProjectGenerated(uiEvent("3.5.0", "jar", "generate", "web"));
+		first.destroy();
+
+		StatisticsService reloaded = new StatisticsService(JsonMapper.builder().build(), file.toString());
+		assertThat(LongStream.of(reloaded.generationsPerHour(24)).sum()).isEqualTo(1);
 	}
 
 	@Test

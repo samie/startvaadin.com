@@ -181,61 +181,89 @@
 }
 
 /*
- * Statistics page (/statistics). A single scrolling column of headline "stat tiles"
- * plus a few horizontal-bar breakdowns built from plain divs (no chart library). Every
- * color is a design token so the page follows the day/night toggle automatically.
+ * Statistics page (/statistics). A live strip, two grids of key-figure cards (projects
+ * and server) with SVG sparklines from the svg-visualizations add-on, and horizontal-bar
+ * breakdowns built from plain divs. Every colour is a design token, and the sparklines
+ * draw in currentColor, so the page follows the day/night toggle automatically.
  */
 .stats-content {
-	max-width: 52rem;
+	max-width: 60rem;
 	margin: 0 auto;
 	width: 100%;
 }
 
-/* Headline numbers wrap into as many columns as fit; each tile is a tinted surface. */
-.stat-tiles {
-	display: flex;
-	flex-wrap: wrap;
+.stats-live {
+	gap: var(--vaadin-gap-s, 0.5rem);
+}
+
+.stats-updated,
+.stats-none {
+	font-size: 0.8125rem;
+	color: var(--vaadin-text-color-secondary);
+}
+
+/* A pulsing dot in front of "Live"; still when the user asks for less motion. */
+.live-badge::before {
+	content: "";
+	width: 0.5em;
+	height: 0.5em;
+	margin-inline-end: 0.4em;
+	border-radius: 50%;
+	background: currentColor;
+	animation: live-pulse 2s ease-in-out infinite;
+}
+
+@keyframes live-pulse {
+	50% {
+		opacity: 0.25;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.live-badge::before {
+		animation: none;
+	}
+}
+
+/* As many card columns as fit, one full-width column on a phone; no breakpoint needed. */
+.stats-kpis {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(min(13rem, 100%), 1fr));
 	gap: var(--vaadin-gap-m, 0.75rem);
-	margin-bottom: var(--vaadin-gap-l, 1.25rem);
 	width: 100%;
 }
 
-.stat-tile {
-	flex: 1 1 8rem;
-	padding: var(--vaadin-padding-l, 1rem);
-	border: 1px solid var(--vaadin-border-color);
-	border-radius: var(--vaadin-radius-l);
+/* The card title carries the figure: large, with digits that don't jump as they tick. */
+.stats-kpi {
+	--vaadin-card-title-font-size: 1.75rem;
+	--vaadin-card-title-font-weight: 600;
+	--vaadin-card-title-line-height: 1.1;
+	font-variant-numeric: tabular-nums;
 }
 
-.stat-number {
-	font-size: 1.75rem;
-	font-weight: 600;
-	line-height: 1.1;
-	color: var(--aura-accent-color, var(--lumo-primary-color));
+/* Sparklines draw in currentColor: the accent for the data, fainter for the scaffolding. */
+.stats-chart {
+	display: block;
+	width: 100%;
+	color: var(--aura-accent-color);
+	overflow: visible;
 }
 
-/* Textual tile value (dates, relative times): calmer than a headline count. */
-.stat-text {
-	font-size: 1.125rem;
-	font-weight: 500;
-	line-height: 1.2;
-	color: var(--lumo-body-text-color);
+.stats-chart .sparkline-label,
+.stats-chart .sparkline-title,
+.stats-chart .sparkline-grid {
+	color: var(--vaadin-text-color-secondary);
 }
 
-.stat-label {
-	margin-top: var(--vaadin-gap-xs, 0.25rem);
-	font-size: 0.8125rem;
-	color: var(--lumo-secondary-text-color);
-}
-
-/* A breakdown section: heading + its bars, full width so it aligns with the tiles. */
-.stat-section {
+/* A breakdown section: heading + its bars, full width so it aligns with the cards. */
+.stat-section,
+.stats-breakdowns {
 	width: 100%;
 }
 
 .stat-section h2 {
 	font-size: 1rem;
-	margin: var(--vaadin-gap-l, 1.25rem) 0 var(--vaadin-gap-xs, 0.25rem);
+	margin: var(--vaadin-gap-l, 1.25rem) 0 var(--vaadin-gap-s, 0.5rem);
 }
 
 /* One row per tallied value: label | proportional bar | exact value. */
@@ -265,14 +293,14 @@
 	max-width: 28rem;
 	height: 0.5rem;
 	border-radius: var(--vaadin-radius-l);
-	background: var(--lumo-contrast-10pct);
+	background: var(--vaadin-border-color-secondary);
 	overflow: hidden;
 }
 
 .bar-fill {
 	height: 100%;
 	border-radius: inherit;
-	background: color-mix(in srgb, var(--aura-accent-color, var(--lumo-primary-color)) 85%, transparent);
+	background: color-mix(in srgb, var(--aura-accent-color) 85%, transparent);
 }
 
 .bar-value {
@@ -280,7 +308,7 @@
 	min-width: 5rem;
 	text-align: right;
 	font-size: 0.8125rem;
-	color: var(--lumo-secondary-text-color);
+	color: var(--vaadin-text-color-secondary);
 }
 
 /* Stacked layout: give the label its own line so the bar keeps a usable width. */

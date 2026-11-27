@@ -12,6 +12,7 @@ import java.nio.file.Path;
 import io.spring.initializr.versionresolver.MavenVersionResolver;
 import io.spring.start.site.container.SimpleDockerServiceResolver;
 import io.spring.start.site.project.ProjectDescriptionCustomizerConfiguration;
+import io.spring.start.site.stats.JvmMetrics;
 import io.spring.start.site.stats.StatisticsService;
 import io.spring.start.site.support.CacheableMavenVersionResolver;
 import io.spring.start.site.support.StartInitializrMetadataUpdateStrategy;
@@ -94,6 +95,11 @@ public class StartApplication {
 	@Bean
 	public StatisticsService statisticsService(JsonMapper jsonMapper, StartConfigurationProperties properties) {
 		return new StatisticsService(jsonMapper, properties.getStatistics().getFile());
+	}
+
+	@Bean
+	public JvmMetrics jvmMetrics() {
+		return new JvmMetrics();
 	}
 
 	@Bean

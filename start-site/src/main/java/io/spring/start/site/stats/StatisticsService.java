@@ -71,6 +71,14 @@ public final class StatisticsService implements DisposableBean {
 
 	private static final long MILLIS_PER_DAY = 86_400_000L;
 
+	private static final long MILLIS_PER_HOUR = 3_600_000L;
+
+	/**
+	 * How many hours of hourly counts are kept: two days, so a 24-hour chart always has a
+	 * full window even right after a restart.
+	 */
+	private static final int HOURS_KEPT = 48;
+
 	private static final Log logger = LogFactory.getLog(StatisticsService.class);
 
 	private final JsonMapper jsonMapper;
@@ -107,6 +115,9 @@ public final class StatisticsService implements DisposableBean {
 
 	private final Map<String, LongAdder> referrers = new ConcurrentHashMap<>();
 
+	// Keyed by hours since the epoch, as text so it persists and merges like the others
+	private final Map<String, LongAdder> hourly = new ConcurrentHashMap<>();
+
 	private volatile long countingSinceEpochMs = System.currentTimeMillis();
 
 	private volatile long lastGeneratedEpochMs;
@@ -138,7 +149,11 @@ public final class StatisticsService implements DisposableBean {
 	public void onProjectGenerated(ProjectGeneratedEvent event) {
 		ProjectRequest request = event.getProjectRequest();
 		this.total.incrementAndGet();
-		this.lastGeneratedEpochMs = System.currentTimeMillis();
+		long now = System.currentTimeMillis();
+		this.lastGeneratedEpochMs = now;
+		long hour = now / MILLIS_PER_HOUR;
+		increment(this.hourly, Long.toString(hour));
+		this.hourly.keySet().removeIf((key) -> parseHour(key) <= hour - HOURS_KEPT);
 		increment(this.javaVersions, request.getJavaVersion());
 		increment(this.bootVersions, request.getBootVersion());
 		increment(this.languages, request.getLanguage());
@@ -181,6 +196,31 @@ public final class StatisticsService implements DisposableBean {
 	public double perDayAverage() {
 		double days = Math.max(1.0, (System.currentTimeMillis() - this.countingSinceEpochMs) / (double) MILLIS_PER_DAY);
 		return this.total.get() / days;
+	}
+
+	/**
+	 * Projects generated in each of the last {@code hours} hours, oldest first; the last
+	 * value is the current, still running hour.
+	 * @param hours number of hours, at most {@value #HOURS_KEPT}
+	 * @return one count per hour
+	 */
+	public long[] generationsPerHour(int hours) {
+		long current = System.currentTimeMillis() / MILLIS_PER_HOUR;
+		long[] counts = new long[Math.min(hours, HOURS_KEPT)];
+		for (int i = 0; i < counts.length; i++) {
+			LongAdder count = this.hourly.get(Long.toString(current - counts.length + 1 + i));
+			counts[i] = (count != null) ? count.sum() : 0;
+		}
+		return counts;
+	}
+
+	private static long parseHour(String key) {
+		try {
+			return Long.parseLong(key);
+		}
+		catch (NumberFormatException ex) {
+			return 0;
+		}
 	}
 
 	public List<Count> topDependencies(int limit) {
@@ -303,6 +343,7 @@ public final class StatisticsService implements DisposableBean {
 			add(this.packaging, snapshot.packaging(), Map.of());
 			add(this.uiActions, snapshot.uiActions(), Map.of());
 			add(this.referrers, snapshot.referrers(), Map.of());
+			add(this.hourly, snapshot.hourly(), Map.of());
 			this.baseline = snapshot;
 			logger.info("Loaded statistics (" + snapshot.total() + " projects) from " + this.file);
 		}
@@ -383,6 +424,7 @@ public final class StatisticsService implements DisposableBean {
 		add(this.packaging, onDisk.packaging(), base.packaging());
 		add(this.uiActions, onDisk.uiActions(), base.uiActions());
 		add(this.referrers, onDisk.referrers(), base.referrers());
+		add(this.hourly, onDisk.hourly(), base.hourly());
 	}
 
 	private static void add(Map<String, LongAdder> map, Map<String, Long> plus, Map<String, Long> minus) {
@@ -405,7 +447,8 @@ public final class StatisticsService implements DisposableBean {
 				merge(onDisk.buildSystems(), current.buildSystems(), base.buildSystems()),
 				merge(onDisk.packaging(), current.packaging(), base.packaging()),
 				merge(onDisk.uiActions(), current.uiActions(), base.uiActions()),
-				merge(onDisk.referrers(), current.referrers(), base.referrers()));
+				merge(onDisk.referrers(), current.referrers(), base.referrers()),
+				merge(onDisk.hourly(), current.hourly(), base.hourly()));
 	}
 
 	private static Map<String, Long> merge(Map<String, Long> onDisk, Map<String, Long> current,
@@ -436,13 +479,14 @@ public final class StatisticsService implements DisposableBean {
 	}
 
 	private static StatisticsSnapshot emptySnapshot() {
-		return new StatisticsSnapshot(0, 0, 0, null, null, null, null, null, null, null, null);
+		return new StatisticsSnapshot(0, 0, 0, null, null, null, null, null, null, null, null, null);
 	}
 
 	private StatisticsSnapshot snapshot() {
 		return new StatisticsSnapshot(this.total.get(), this.countingSinceEpochMs, this.lastGeneratedEpochMs,
 				toMap(this.dependencies), toMap(this.javaVersions), toMap(this.bootVersions), toMap(this.languages),
-				toMap(this.buildSystems), toMap(this.packaging), toMap(this.uiActions), toMap(this.referrers));
+				toMap(this.buildSystems), toMap(this.packaging), toMap(this.uiActions), toMap(this.referrers),
+				toMap(this.hourly));
 	}
 
 	private static Map<String, Long> toMap(Map<String, LongAdder> map) {

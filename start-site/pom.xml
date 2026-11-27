@@ -13,6 +13,7 @@
 
 	<properties>
 		<vaadin.version>25.3.6</vaadin.version>
+		<svg-visualizations.version>1.2.0</svg-visualizations.version>
 	</properties>
 
 	<dependencyManagement>
@@ -62,6 +63,11 @@
 			<groupId>com.vaadin</groupId>
 			<artifactId>vaadin-dev</artifactId>
 			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>in.virit</groupId>
+			<artifactId>svg-visualizations</artifactId>
+			<version>${svg-visualizations.version}</version>
 		</dependency>
 
 		<dependency>

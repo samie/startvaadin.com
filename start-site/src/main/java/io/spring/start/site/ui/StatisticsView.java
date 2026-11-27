@@ -9,6 +9,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
@@ -17,8 +18,11 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.applayout.AppLayout;
+import com.vaadin.flow.component.badge.Badge;
+import com.vaadin.flow.component.badge.BadgeVariant;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.card.Card;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
@@ -26,7 +30,6 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.PageTitle;
@@ -36,13 +39,17 @@ import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.shared.Registration;
 import io.spring.start.site.StartConfigurationProperties;
 import io.spring.start.site.stats.Count;
+import io.spring.start.site.stats.JvmMetrics;
 import io.spring.start.site.stats.StatisticsService;
+import org.vaadin.svgvis.SvgSparkLine;
+import org.vaadin.svgvis.SvgSparkLine.DataPoint;
 
 /**
- * A light-hearted usage dashboard for the curious. Served at {@code /statistics} (plus a
- * {@code /stats} alias) by Vaadin's root mapping. Mirrors {@link MainView}'s shell (Aura
- * theme + dark-mode toggle) and refreshes itself on a poll so the total ticks up live
- * while the page is watched.
+ * A light-hearted live usage dashboard for the curious. Served at {@code /statistics}
+ * (plus a {@code /stats} alias) by Vaadin's root mapping. Mirrors {@link MainView}'s
+ * shell (Aura theme + dark-mode toggle). Key figures, a 24-hour activity chart and live
+ * server figures ({@link JvmMetrics}) are built once and updated in place on every poll,
+ * so the page ticks without flicker; only the breakdown bars are rebuilt.
  *
  * @author Sami Ekblad
  */
@@ -53,10 +60,17 @@ public final class StatisticsView extends AppLayout {
 
 	private static final int TOP_DEPENDENCIES = 12;
 
+	private static final int ACTIVITY_HOURS = 24;
+
 	private static final DateTimeFormatter DATE = DateTimeFormatter.ofPattern("d MMM yyyy", Locale.US)
 		.withZone(ZoneId.systemDefault());
 
+	private static final DateTimeFormatter TIME = DateTimeFormatter.ofPattern("HH:mm:ss", Locale.US)
+		.withZone(ZoneId.systemDefault());
+
 	private final StatisticsService statistics;
+
+	private final JvmMetrics jvmMetrics;
 
 	private final InitializrUiService service;
 
@@ -68,25 +82,94 @@ public final class StatisticsView extends AppLayout {
 
 	private final VerticalLayout content;
 
+	private final Span updated = new Span();
+
+	private final Card generated = kpi("Projects generated");
+
+	private final SvgSparkLine activity = sparkLine(null);
+
+	private final Card average = kpi("Average / day");
+
+	private final Card last = kpi("Last generated");
+
+	private final Card since = kpi("Counting since");
+
+	private final Card cpu = kpi("CPU load");
+
+	private final SvgSparkLine cpuChart = sparkLine(" %");
+
+	private final Card heap = kpi("Heap used");
+
+	private final SvgSparkLine heapChart = sparkLine(" MB");
+
+	private final Card threads = kpi("Live threads");
+
+	private final Card uptime = kpi("Uptime");
+
+	private final Div breakdowns = new Div();
+
 	private boolean darkMode = true;
 
 	private Registration pollRegistration;
 
-	public StatisticsView(StatisticsService statistics, InitializrUiService service, Preferences preferences,
-			StartConfigurationProperties properties) {
+	public StatisticsView(StatisticsService statistics, JvmMetrics jvmMetrics, InitializrUiService service,
+			Preferences preferences, StartConfigurationProperties properties) {
 		this.statistics = statistics;
+		this.jvmMetrics = jvmMetrics;
 		this.service = service;
 		this.preferences = preferences;
 		this.pollMillis = Math.max(2, properties.getStatistics().getPollIntervalSeconds()) * 1000;
 		this.themeToggle = new Button(new Icon(VaadinIcon.SUN), (event) -> toggleTheme());
-		this.themeToggle.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
+		this.themeToggle.addThemeVariants(ButtonVariant.TERTIARY);
 		this.themeToggle.setAriaLabel("Switch to light mode");
 		this.themeToggle.setTooltipText("Switch to light mode");
 		buildNavbar();
 		this.content = new VerticalLayout();
 		this.content.addClassName("stats-content");
+		this.content.add(liveStrip());
+		this.generated.add(this.activity);
+		this.content.add(section("Projects", kpis(this.generated, this.average, this.last, this.since)));
+		this.cpu.add(this.cpuChart);
+		this.heap.add(this.heapChart);
+		this.content.add(section("Server", kpis(this.cpu, this.heap, this.threads, this.uptime)));
+		this.breakdowns.addClassName("stats-breakdowns");
+		this.content.add(this.breakdowns);
 		setContent(this.content);
 		refresh();
+	}
+
+	private Component liveStrip() {
+		Badge live = new Badge("Live");
+		live.addThemeVariants(BadgeVariant.SUCCESS);
+		live.addClassName("live-badge");
+		this.updated.addClassName("stats-updated");
+		HorizontalLayout strip = new HorizontalLayout(live, this.updated);
+		strip.setAlignItems(FlexComponent.Alignment.CENTER);
+		strip.addClassName("stats-live");
+		return strip;
+	}
+
+	private static Card kpi(String label) {
+		Card card = new Card();
+		card.addClassName("stats-kpi");
+		card.setSubtitle(label);
+		return card;
+	}
+
+	private static SvgSparkLine sparkLine(String unit) {
+		SvgSparkLine chart = new SvgSparkLine(72);
+		chart.addClassName("stats-chart");
+		chart.setUnit(unit);
+		// Straight segments: a smoothed curve would overshoot the real minimum and
+		// maximum
+		chart.setUseBezierCurve(false);
+		return chart;
+	}
+
+	private static Component kpis(Card... cards) {
+		Div grid = new Div(cards);
+		grid.addClassName("stats-kpis");
+		return grid;
 	}
 
 	private void buildNavbar() {
@@ -120,47 +203,53 @@ public final class StatisticsView extends AppLayout {
 	}
 
 	private void refresh() {
-		this.content.removeAll();
+		this.updated.setText("Updated " + TIME.format(Instant.now()));
+		refreshProjects();
+		refreshServer();
+		refreshBreakdowns();
+	}
+
+	private void refreshProjects() {
 		long total = this.statistics.total();
-		if (total == 0) {
-			this.content.add(emptyState());
+		long[] perHour = this.statistics.generationsPerHour(ACTIVITY_HOURS);
+		this.generated.setTitle(formatCount(total));
+		this.activity.setData(Arrays.stream(perHour).asDoubleStream().toArray());
+		this.activity.setTitle(formatCount(Arrays.stream(perHour).sum()) + " in the last 24 h");
+		this.average.setTitle(formatCount(Math.round(this.statistics.perDayAverage())));
+		this.last.setTitle(relative(this.statistics.lastGenerated()));
+		this.since.setTitle(DATE.format(this.statistics.countingSince()));
+	}
+
+	private void refreshServer() {
+		List<JvmMetrics.Sample> history = this.jvmMetrics.history();
+		JvmMetrics.Sample latest = history.get(history.size() - 1);
+		this.cpu.setTitle(Math.round(latest.cpuLoad() * 100) + " %");
+		this.cpuChart
+			.setData(history.stream().map((sample) -> DataPoint.of(sample.time(), sample.cpuLoad() * 100)).toList());
+		this.heap.setTitle(megabytes(latest.heapUsed()));
+		this.heap.setSubtitle(
+				"Heap used · " + Math.round(latest.heapShare() * 100) + " % of " + megabytes(latest.heapMax()));
+		this.heapChart.setData(history.stream()
+			.map((sample) -> DataPoint.of(sample.time(), sample.heapUsed() / 1_048_576.0))
+			.toList());
+		this.threads.setTitle(formatCount(latest.threads()));
+		this.uptime.setTitle(duration(this.jvmMetrics.uptime()));
+	}
+
+	private void refreshBreakdowns() {
+		this.breakdowns.removeAll();
+		if (this.statistics.total() == 0) {
+			this.breakdowns.add(emptyState());
 			return;
 		}
-		this.content.add(buildTiles(total));
-		this.content.add(section("Top dependencies", bars(this.statistics.topDependencies(TOP_DEPENDENCIES), true)));
-		this.content.add(section("Spring Boot versions", bars(this.statistics.bootVersionDistribution(), false)));
-		this.content.add(section("Java versions", bars(this.statistics.javaVersionDistribution(), false)));
-		this.content.add(section("Build systems", bars(this.statistics.buildSystemDistribution(), false)));
-		this.content.add(section("Languages", bars(this.statistics.languageDistribution(), false)));
-		this.content.add(section("Packaging", bars(this.statistics.packagingDistribution(), false)));
-		this.content.add(section("Generate vs Explore", bars(this.statistics.uiActionDistribution(), false)));
-		this.content.add(section("Arrived from", bars(this.statistics.referrerDistribution(), false)));
-	}
-
-	private Component buildTiles(long total) {
-		FlexLayout tiles = new FlexLayout();
-		tiles.addClassName("stat-tiles");
-		tiles.add(tile("Projects generated", formatCount(total), true));
-		tiles.add(tile("Counting since", DATE.format(this.statistics.countingSince()), false));
-		tiles.add(tile("Average / day", formatCount(Math.round(this.statistics.perDayAverage())), true));
-		tiles.add(tile("Last generated", relative(this.statistics.lastGenerated()), false));
-		return tiles;
-	}
-
-	private static Component tile(String label, String value, boolean numeric) {
-		Div tile = new Div();
-		tile.addClassNames("stat-tile", "aura-surface");
-		Div number = new Div();
-		number.addClassNames(numeric ? "stat-number" : "stat-text");
-		if (numeric) {
-			number.addClassName("mono");
-		}
-		number.setText(value);
-		Div caption = new Div();
-		caption.addClassName("stat-label");
-		caption.setText(label);
-		tile.add(number, caption);
-		return tile;
+		this.breakdowns.add(section("Top dependencies", bars(this.statistics.topDependencies(TOP_DEPENDENCIES), true)));
+		this.breakdowns.add(section("Spring Boot versions", bars(this.statistics.bootVersionDistribution(), false)));
+		this.breakdowns.add(section("Java versions", bars(this.statistics.javaVersionDistribution(), false)));
+		this.breakdowns.add(section("Build systems", bars(this.statistics.buildSystemDistribution(), false)));
+		this.breakdowns.add(section("Languages", bars(this.statistics.languageDistribution(), false)));
+		this.breakdowns.add(section("Packaging", bars(this.statistics.packagingDistribution(), false)));
+		this.breakdowns.add(section("Generate vs Explore", bars(this.statistics.uiActionDistribution(), false)));
+		this.breakdowns.add(section("Arrived from", bars(this.statistics.referrerDistribution(), false)));
 	}
 
 	private static Component section(String title, Component body) {
@@ -176,7 +265,7 @@ public final class StatisticsView extends AppLayout {
 	private Component bars(List<Count> counts, boolean resolveDependencyNames) {
 		if (counts.isEmpty()) {
 			Span none = new Span("No data yet.");
-			none.getStyle().set("color", "var(--lumo-secondary-text-color)");
+			none.addClassName("stats-none");
 			return none;
 		}
 		long max = counts.stream().mapToLong(Count::count).max().orElse(1);
@@ -240,6 +329,23 @@ public final class StatisticsView extends AppLayout {
 
 	private static String formatCount(long value) {
 		return String.format(Locale.US, "%,d", value);
+	}
+
+	private static String megabytes(long bytes) {
+		long mb = Math.round(bytes / 1_048_576.0);
+		return (mb >= 1024) ? String.format(Locale.US, "%.1f GB", mb / 1024.0) : mb + " MB";
+	}
+
+	private static String duration(Duration duration) {
+		long days = duration.toDays();
+		if (days > 0) {
+			return days + " d " + duration.toHoursPart() + " h";
+		}
+		long hours = duration.toHours();
+		if (hours > 0) {
+			return hours + " h " + duration.toMinutesPart() + " min";
+		}
+		return duration.toMinutes() + " min";
 	}
 
 	private static String percent(double share) {

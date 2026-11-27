@@ -24,12 +24,14 @@ import java.util.Map;
  * @param packaging per-packaging counts
  * @param uiActions per-UI-action counts (generate / explore / cli)
  * @param referrers per-referrer-host arrival counts
+ * @param hourly generation counts per hour of the last two days, keyed by hours since the
+ * epoch (absent in files written before it was added)
  * @author Sami Ekblad
  */
 public record StatisticsSnapshot(long total, long countingSinceEpochMs, long lastGeneratedEpochMs,
 		Map<String, Long> dependencies, Map<String, Long> javaVersions, Map<String, Long> bootVersions,
 		Map<String, Long> languages, Map<String, Long> buildSystems, Map<String, Long> packaging,
-		Map<String, Long> uiActions, Map<String, Long> referrers) {
+		Map<String, Long> uiActions, Map<String, Long> referrers, Map<String, Long> hourly) {
 
 	public StatisticsSnapshot {
 		dependencies = (dependencies != null) ? dependencies : Map.of();
@@ -40,6 +42,7 @@ public record StatisticsSnapshot(long total, long countingSinceEpochMs, long las
 		packaging = (packaging != null) ? packaging : Map.of();
 		uiActions = (uiActions != null) ? uiActions : Map.of();
 		referrers = (referrers != null) ? referrers : Map.of();
+		hourly = (hourly != null) ? hourly : Map.of();
 	}
 
 }
