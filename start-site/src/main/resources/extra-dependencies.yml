@@ -38,7 +38,7 @@ initializr:
           id: viritin
           groupId: in.virit
           artifactId: viritin
-          version: 3.9.1
+          version: 3.10.0
           description: Productivity helpers for Vaadin Flow, including fluent component APIs, a bean validation form and an app framework.
           compatibilityRange: "[4.1.0,4.2.0-M1)"
           links:
