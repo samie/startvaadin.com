@@ -102,7 +102,11 @@ public class DependenciesSection extends VerticalLayout {
 		detail.getStyle()
 			.set("color", invalid ? "var(--lumo-error-text-color)" : "var(--lumo-secondary-text-color)")
 			.set("font-size", "var(--lumo-font-size-s)");
-		VerticalLayout text = new VerticalLayout(title, detail);
+		HorizontalLayout header = new HorizontalLayout(title);
+		header.setWidthFull();
+		header.setAlignItems(FlexComponent.Alignment.CENTER);
+		this.service.groupName(id).map(DependencyPickerDialog::groupBadge).ifPresent(header::add);
+		VerticalLayout text = new VerticalLayout(header, detail);
 		text.setPadding(false);
 		text.setSpacing(false);
 		Button remove = new Button(new Icon(VaadinIcon.CLOSE), (event) -> toggle(id));

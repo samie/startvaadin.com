@@ -363,3 +363,10 @@
 	flex-shrink: 0;
 	color: var(--lumo-secondary-text-color);
 }
+
+/* Catalog group of a dependency ("Developer Tools", "Vaadin Add-ons"), at the end of its
+ * name row in both the picker dialog and the selected-dependency list. */
+.source-badge {
+	margin-inline-start: auto;
+	flex-shrink: 0;
+}

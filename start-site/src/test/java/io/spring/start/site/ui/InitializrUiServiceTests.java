@@ -201,6 +201,14 @@ class InitializrUiServiceTests {
 	}
 
 	@Test
+	void groupNameNamesTheCatalogGroupOfADependency() {
+		assertThat(this.service.groupName("devtools")).contains("Developer Tools");
+		assertThat(this.service.groupName("vaadin-webpush")).contains("Vaadin Framework");
+		assertThat(this.service.groupName("svg-visualizations")).contains("Vaadin Add-ons");
+		assertThat(this.service.groupName("no-such-dependency")).isEmpty();
+	}
+
+	@Test
 	void incompatibilityHintReturnsNullWhenCompatible() {
 		InitializrFormModel model = this.service.defaultFormModel();
 		var dep = this.service.getDependency("web").orElseThrow();

@@ -152,6 +152,21 @@ public class InitializrUiService {
 	}
 
 	/**
+	 * Name of the catalog group a dependency belongs to, such as "Developer Tools" or
+	 * "Vaadin Add-ons", shown as its source badge.
+	 * @param id the dependency id
+	 * @return the group name, or empty if no group lists the dependency
+	 */
+	public Optional<String> groupName(String id) {
+		return getMetadata().getDependencies()
+			.getContent()
+			.stream()
+			.filter((group) -> group.getContent().stream().anyMatch((dependency) -> dependency.getId().equals(id)))
+			.map(DependencyGroup::getName)
+			.findFirst();
+	}
+
+	/**
 	 * Compatibility hint for a single dependency at the supplied boot version. Used by
 	 * the chip list to flag an already-selected dependency as no-longer-compatible when
 	 * the user switches the Spring Boot version.

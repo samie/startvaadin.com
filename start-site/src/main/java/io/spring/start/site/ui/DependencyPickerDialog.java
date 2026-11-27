@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.function.Consumer;
 
+import com.vaadin.flow.component.badge.Badge;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dialog.Dialog;
@@ -127,9 +128,7 @@ public class DependencyPickerDialog extends Dialog {
 		SvgIcon icon = VendorIcons.icon(dependency);
 		Span name = new Span(dependency.getName());
 		name.getStyle().set("font-weight", "600");
-		Span groupLabel = new Span(row.groupName());
-		groupLabel.getElement().getThemeList().add("badge");
-		groupLabel.getStyle().set("margin-left", "auto");
+		Badge groupLabel = groupBadge(row.groupName());
 		HorizontalLayout header = new HorizontalLayout(name, groupLabel);
 		header.setWidthFull();
 		header.setAlignItems(FlexComponent.Alignment.CENTER);
@@ -169,6 +168,18 @@ public class DependencyPickerDialog extends Dialog {
 			content.getStyle().set("background", "var(--aura-accent-surface)");
 		}
 		return content;
+	}
+
+	/**
+	 * The badge naming a dependency's catalog group, shared with the selected-dependency
+	 * list so both show the source the same way.
+	 * @param groupName the group name
+	 * @return the badge, pushed to the end of its row
+	 */
+	static Badge groupBadge(String groupName) {
+		Badge badge = new Badge(groupName);
+		badge.addClassName("source-badge");
+		return badge;
 	}
 
 	private record Row(String groupName, DependencyEntry entry) {
