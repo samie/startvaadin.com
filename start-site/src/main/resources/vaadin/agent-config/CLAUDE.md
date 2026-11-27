@@ -10,6 +10,11 @@ Guidance for Claude Code when working on this generated Vaadin project.
 - Use the `vaadin` MCP server for Vaadin documentation, APIs, components, styling,
   and version information instead of guessing about Vaadin APIs or framework
   behavior.
+- Use the `vaadin-directory` MCP server to find community add-ons in the Vaadin
+  Directory before building a component from scratch: search for one, check that it
+  supports this project's Vaadin version, and add the Maven coordinates it reports.
+  Add-ons are served from the `https://maven.vaadin.com/vaadin-addons` repository;
+  add it to the build if it is missing.
 - Use the `project_tools` MCP server when available for information specific to
   this generated application.
 - The theme (Aura, following the system's light or dark mode) is set in `AppShell`;

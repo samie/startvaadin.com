@@ -47,11 +47,17 @@ class VaadinAgentConfigProjectContributorTests extends AbstractExtensionTests {
 		assertThat(project.resolve(".claude/skills/aura-theme/references/components.md")).isRegularFile();
 		assertThat(contentOf(project.resolve(".mcp.json").toFile())).contains("\"type\": \"http\"")
 			.contains("https://mcp.vaadin.com/docs")
+			.contains("\"vaadin-directory\"")
+			.contains("https://vaadin.com/directory/mcp")
 			.doesNotContain("vaadin-direcotry");
 		assertThatCode(() -> new ObjectMapper().readTree(project.resolve(".mcp.json").toFile()))
 			.doesNotThrowAnyException();
 		assertThat(contentOf(project.resolve(".codex/config.toml").toFile())).contains("[mcp_servers.vaadin]")
-			.contains("https://mcp.vaadin.com/docs");
+			.contains("https://mcp.vaadin.com/docs")
+			.contains("[mcp_servers.vaadin-directory]")
+			.contains("https://vaadin.com/directory/mcp");
+		assertThat(contentOf(project.resolve("AGENTS.md").toFile())).contains("`vaadin-directory` MCP server");
+		assertThat(contentOf(project.resolve("CLAUDE.md").toFile())).contains("`vaadin-directory` MCP server");
 	}
 
 	@Test

@@ -1,2 +1,5 @@
 [mcp_servers.vaadin]
 url = "https://mcp.vaadin.com/docs"
+
+[mcp_servers.vaadin-directory]
+url = "https://vaadin.com/directory/mcp"
