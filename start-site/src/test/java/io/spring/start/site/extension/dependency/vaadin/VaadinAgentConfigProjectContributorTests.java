@@ -28,8 +28,14 @@ import static org.assertj.core.api.Assertions.contentOf;
  */
 class VaadinAgentConfigProjectContributorTests extends AbstractExtensionTests {
 
-	private static final List<String> VENDORED_SKILLS = List.of("aura-theme", "vaadin-frontend-design",
-			"vaadin-form-layout", "vaadin-browserless-testing", "vaadin-usage-review");
+	/**
+	 * The skills fetched from {@code vaadin/agent-skills}. Kept in step with the skill
+	 * names listed in {@code AGENTS.md} and {@code CLAUDE.md}; when upstream adds,
+	 * removes or renames a skill, {@link #skillsMatchTheFetchedTree()} fails until both
+	 * are updated.
+	 */
+	private static final List<String> SKILLS = List.of("aura-theme", "vaadin-frontend-design", "vaadin-form-layout",
+			"vaadin-browserless-testing", "vaadin-usage-review");
 
 	@Test
 	void agentConfigIsContributedWithVaadin() {
@@ -39,7 +45,7 @@ class VaadinAgentConfigProjectContributorTests extends AbstractExtensionTests {
 		assertThat(project.resolve(".codex/config.toml")).isRegularFile();
 		assertThat(project.resolve("AGENTS.md")).isRegularFile();
 		assertThat(project.resolve("CLAUDE.md")).isRegularFile();
-		for (String skill : VENDORED_SKILLS) {
+		for (String skill : SKILLS) {
 			assertThat(project.resolve(".agents/skills/" + skill + "/SKILL.md")).isRegularFile();
 			assertThat(project.resolve(".claude/skills/" + skill + "/SKILL.md")).isRegularFile();
 		}
@@ -74,6 +80,22 @@ class VaadinAgentConfigProjectContributorTests extends AbstractExtensionTests {
 			});
 		}
 		assertThat(contentOf(agentsSkills.resolve("aura-theme/SKILL.md").toFile())).contains("name: aura-theme");
+	}
+
+	@Test
+	void skillsMatchTheFetchedTree() throws Exception {
+		Path project = generateProject(createProjectRequest(SupportedBootVersion.V4_1, "vaadin")).getProjectDirectory();
+		try (Stream<Path> dirs = Files.list(project.resolve(".claude/skills"))) {
+			assertThat(dirs.filter(Files::isDirectory).map((dir) -> dir.getFileName().toString()))
+				.as("skills fetched from vaadin/agent-skills; update SKILLS, AGENTS.md and CLAUDE.md")
+				.containsExactlyInAnyOrderElementsOf(SKILLS);
+		}
+		String agents = contentOf(project.resolve("AGENTS.md").toFile());
+		String claude = contentOf(project.resolve("CLAUDE.md").toFile());
+		for (String skill : SKILLS) {
+			assertThat(agents).contains("`" + skill + "`");
+			assertThat(claude).contains("`" + skill + "`");
+		}
 	}
 
 	@Test

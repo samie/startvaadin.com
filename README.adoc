@@ -122,6 +122,27 @@ The app holds server-side Vaadin session state and keeps per-instance statistics
 runs as a *single instance*: set min = max = 1 instance and disable autoscaling. Running
 multiple instances would require sticky sessions and a rethink of statistics storage.
 
+=== Pinned versions
+
+As in start.spring.io, every external version is pinned in the repository and changes
+through a small "Upgrade to X" commit, so a deploy ships exactly what was tested.
+Nothing is fetched from third parties while the site runs. Versions that upstream
+maintains (the Vaadin BOM mapping in `application.yml`, for example) arrive by syncing
+with upstream. The versions this fork owns are moved before each deploy by the local
+deploy tooling:
+
+* Vaadin agent skills: the `vaadin-agent-skills.ref` commit in `start-site/pom.xml`,
+fetched from `vaadin/agent-skills` at build time.
+* Add-ons with a version in `extra-dependencies.yml`, and Dev Tunnel: the newest release
+in the same major version. Major upgrades are reported, not applied.
+* The site's own `vaadin.version`: the version of upstream's Vaadin BOM mapping.
+* The Spring Boot versions offered in the UI: `boot-versions.yml`, a snapshot from
+spring.io, written by `BootVersionsSnapshotTests` when run with `-DbootVersions=write`.
+
+The build fetches the agent skills from `codeload.github.com`, so it needs network
+access, as it does for Maven Central. After `clean`, run
+`./mvnw -pl start-site generate-resources` once before starting the app from an IDE.
+
 
 == License
 The start.spring.io website is Open Source software released under the

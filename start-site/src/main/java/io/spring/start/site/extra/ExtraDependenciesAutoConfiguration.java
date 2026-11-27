@@ -11,9 +11,7 @@ import io.spring.initializr.metadata.InitializrMetadataProvider;
 import io.spring.initializr.metadata.InitializrProperties;
 import io.spring.initializr.web.autoconfigure.InitializrAutoConfiguration;
 import io.spring.initializr.web.support.DefaultInitializrMetadataProvider;
-import io.spring.initializr.web.support.InitializrMetadataUpdateStrategy;
 
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -21,9 +19,11 @@ import org.springframework.core.io.ClassPathResource;
 
 /**
  * Builds the Initializr metadata the same way {@link InitializrAutoConfiguration} does,
- * with the {@link ExtraDependencies} merged in. Registered as an auto-configuration that
- * runs first, so that the upstream metadata provider backs off without any change to
- * upstream code.
+ * with the {@link ExtraDependencies} merged in and the Spring Boot versions taken from
+ * the deploy-time {@link BootVersions} snapshot. The metadata is not refreshed from
+ * spring.io while the site runs, so what is deployed is exactly what was tested.
+ * Registered as an auto-configuration that runs first, so that the upstream metadata
+ * provider backs off without any change to upstream code.
  *
  * @author Sami Ekblad
  */
@@ -37,14 +37,18 @@ public class ExtraDependenciesAutoConfiguration {
 	}
 
 	@Bean
+	BootVersions bootVersions() {
+		return BootVersions.load(new ClassPathResource(BootVersions.LOCATION));
+	}
+
+	@Bean
 	InitializrMetadataProvider initializrMetadataProvider(InitializrProperties properties,
-			ExtraDependencies extraDependencies,
-			ObjectProvider<InitializrMetadataUpdateStrategy> initializrMetadataUpdateStrategy) {
+			ExtraDependencies extraDependencies, BootVersions bootVersions) {
 		InitializrMetadata metadata = InitializrMetadataBuilder.fromInitializrProperties(properties)
 			.withCustomizer(extraDependencies)
+			.withCustomizer(bootVersions)
 			.build();
-		return new DefaultInitializrMetadataProvider(metadata,
-				initializrMetadataUpdateStrategy.getIfAvailable(() -> (current) -> current));
+		return new DefaultInitializrMetadataProvider(metadata, (current) -> current);
 	}
 
 }

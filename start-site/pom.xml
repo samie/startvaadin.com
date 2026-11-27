@@ -14,6 +14,11 @@
 	<properties>
 		<vaadin.version>25.3.6</vaadin.version>
 		<svg-visualizations.version>1.2.0</svg-visualizations.version>
+		<!-- Commit of https://github.com/vaadin/agent-skills whose skills/ tree is fetched
+			at build time and copied into generated Vaadin projects. Bumped on deploy by
+			.local/upgrade-pins.py. -->
+		<vaadin-agent-skills.ref>c0645a9fe3770ce30a86167bf265c4ed105ad2d4</vaadin-agent-skills.ref>
+		<vaadin-agent-skills.dir>${project.build.directory}/generated-resources/agent-skills</vaadin-agent-skills.dir>
 	</properties>
 
 	<dependencyManagement>
@@ -167,6 +172,54 @@
 						<id>repackage</id>
 						<configuration>
 							<classifier>exec</classifier>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<!-- Fetch the pinned Vaadin agent skills into vaadin/agent-config/skills/. -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>fetch-vaadin-agent-skills</id>
+						<phase>generate-resources</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<target>
+								<property name="skills.archive"
+									value="${project.build.directory}/vaadin-agent-skills-${vaadin-agent-skills.ref}.tar.gz"/>
+								<get src="https://codeload.github.com/vaadin/agent-skills/tar.gz/${vaadin-agent-skills.ref}"
+									dest="${skills.archive}" skipexisting="true"/>
+								<delete dir="${vaadin-agent-skills.dir}"/>
+								<untar src="${skills.archive}" dest="${vaadin-agent-skills.dir}/vaadin/agent-config"
+									compression="gzip">
+									<patternset includes="*/skills/**"/>
+									<cutdirsmapper dirs="1"/>
+								</untar>
+							</target>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>add-vaadin-agent-skills</id>
+						<phase>generate-resources</phase>
+						<goals>
+							<goal>add-resource</goal>
+						</goals>
+						<configuration>
+							<resources>
+								<resource>
+									<directory>${vaadin-agent-skills.dir}</directory>
+								</resource>
+							</resources>
 						</configuration>
 					</execution>
 				</executions>
