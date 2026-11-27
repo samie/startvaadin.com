@@ -63,6 +63,40 @@ class InitializrUiServiceTests {
 	}
 
 	@Test
+	void typesOfferOnlyFullProjects() {
+		assertThat(this.service.getTypes()).extracting(DefaultMetadataElement::getId)
+			.containsExactlyInAnyOrder("gradle-project", "gradle-project-kotlin", "maven-project");
+	}
+
+	@Test
+	void buildOnlyTypesAreMappedToFullProjects() {
+		InitializrFormModel model = new InitializrFormModel();
+		model.setType("maven-build");
+		assertThat(model.getType()).isEqualTo("maven-project");
+		model.setType("gradle-build");
+		assertThat(model.getType()).isEqualTo("gradle-project");
+		model.setType("gradle-project-kotlin");
+		assertThat(model.getType()).isEqualTo("gradle-project-kotlin");
+	}
+
+	@Test
+	void generatedMavenProjectKeepsPomProvenanceComment() {
+		InitializrFormModel model = this.service.defaultFormModel();
+		Map<String, String> files = this.service.explore(model);
+		assertThat(files).hasEntrySatisfying("vaadin-demo/pom.xml",
+				(pom) -> assertThat(pom).contains("<!-- Project from https://pro.startvaadin.com/ -->"));
+	}
+
+	@Test
+	void generatedMavenExampleProjectKeepsPomProvenanceComment() {
+		InitializrFormModel model = this.service.defaultFormModel();
+		model.setExampleId("crud");
+		Map<String, String> files = this.service.explore(model);
+		assertThat(files).hasEntrySatisfying("vaadin-demo/pom.xml",
+				(pom) -> assertThat(pom).contains("<!-- Project from https://pro.startvaadin.com/ -->"));
+	}
+
+	@Test
 	void exploreReturnsTextContentForCommonFiles() {
 		InitializrFormModel model = this.service.defaultFormModel();
 		model.setType("maven-project");
@@ -173,10 +207,9 @@ class InitializrUiServiceTests {
 	}
 
 	@Test
-	void javaVersionsStartAtJava21() {
+	void javaVersionsIncludeJava17() {
 		assertThat(this.service.getJavaVersions()).extracting(DefaultMetadataElement::getId)
-			.contains("21")
-			.doesNotContain("17");
+			.containsExactly("27", "25", "21", "17");
 	}
 
 	@Test

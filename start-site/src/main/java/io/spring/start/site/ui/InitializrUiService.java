@@ -73,7 +73,14 @@ public class InitializrUiService {
 	}
 
 	public List<DefaultMetadataElement> getTypes() {
-		return getMetadata().getTypes().getContent().stream().map(InitializrUiService::toDefaultElement).toList();
+		// Like start.spring.io, offer only full projects: the build-file-only types
+		// (pom.xml, build.gradle) would drop the Application UI template.
+		return getMetadata().getTypes()
+			.getContent()
+			.stream()
+			.filter((type) -> "project".equals(type.getTags().get("format")))
+			.map(InitializrUiService::toDefaultElement)
+			.toList();
 	}
 
 	public List<DefaultMetadataElement> getLanguages() {
@@ -89,11 +96,7 @@ public class InitializrUiService {
 	}
 
 	public List<DefaultMetadataElement> getJavaVersions() {
-		return getMetadata().getJavaVersions()
-			.getContent()
-			.stream()
-			.filter((version) -> !InitializrFormModel.isBelowMinimum(version.getId()))
-			.toList();
+		return getMetadata().getJavaVersions().getContent();
 	}
 
 	public List<DefaultMetadataElement> getConfigurationFileFormats() {

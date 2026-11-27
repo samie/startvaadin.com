@@ -75,10 +75,10 @@ class ShareUrlCodecTests {
 	}
 
 	@Test
-	void decodeRaisesAJavaVersionBelowTheMinimum() {
+	void decodeKeepsJava17() {
 		InitializrFormModel model = new InitializrFormModel();
 		ShareUrlCodec.decodeInto("#!type=maven-project&javaVersion=17", model);
-		assertThat(model.getJavaVersion()).isEqualTo("21");
+		assertThat(model.getJavaVersion()).isEqualTo("17");
 	}
 
 	@Test

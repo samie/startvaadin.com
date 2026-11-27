@@ -35,9 +35,9 @@ public class InitializrFormModel {
 	private String packaging;
 
 	/**
-	 * The lowest Java version this instance generates projects for. Vaadin 25 needs Java
-	 * 21, so older versions are not offered, and an older one from a bookmark, a share
-	 * link or the history is raised to it.
+	 * The lowest Java version Vaadin supports, and the form's default. Older versions are
+	 * still offered for projects without Vaadin; with Vaadin, the generator raises them
+	 * to this version (see {@code VaadinVersionProjectDescriptionCustomizer}).
 	 */
 	public static final int MINIMUM_JAVA_VERSION = 21;
 
@@ -54,7 +54,24 @@ public class InitializrFormModel {
 	}
 
 	public void setType(String type) {
-		this.type = type;
+		this.type = toProjectType(type);
+	}
+
+	/**
+	 * Map a build-file-only type to the matching full project type. The form offers only
+	 * full projects, but share links and saved preferences may still carry the old ids.
+	 * @param type a project type id
+	 * @return the full project type for {@code maven-build} and {@code gradle-build},
+	 * otherwise {@code type} unchanged
+	 */
+	public static String toProjectType(String type) {
+		if ("maven-build".equals(type)) {
+			return "maven-project";
+		}
+		if ("gradle-build".equals(type)) {
+			return "gradle-project";
+		}
+		return type;
 	}
 
 	public String getLanguage() {
@@ -126,25 +143,7 @@ public class InitializrFormModel {
 	}
 
 	public void setJavaVersion(String javaVersion) {
-		this.javaVersion = isBelowMinimum(javaVersion) ? String.valueOf(MINIMUM_JAVA_VERSION) : javaVersion;
-	}
-
-	/**
-	 * Whether the given Java version id is older than {@link #MINIMUM_JAVA_VERSION}.
-	 * @param javaVersion a Java version id such as {@code 17} or {@code 21}
-	 * @return {@code true} for an older version, {@code false} otherwise, including for
-	 * {@code null} and ids that are not a plain number
-	 */
-	public static boolean isBelowMinimum(String javaVersion) {
-		if (javaVersion == null) {
-			return false;
-		}
-		try {
-			return Integer.parseInt(javaVersion.strip()) < MINIMUM_JAVA_VERSION;
-		}
-		catch (NumberFormatException ex) {
-			return false;
-		}
+		this.javaVersion = javaVersion;
 	}
 
 	public String getConfigurationFileFormat() {
