@@ -32,6 +32,15 @@ public record Example(String id, String title, String description, List<String> 
 	}
 
 	/**
+	 * Site-relative path of the clean link to this example, served by
+	 * {@link TemplateLinkController}.
+	 * @return the link path, e.g. {@code /template/crud}
+	 */
+	public String linkPath() {
+		return "/template/" + this.id;
+	}
+
+	/**
 	 * URL of this example's screenshot, served from {@code META-INF/resources} at the
 	 * context root. An absolute path is used (not a {@code context://} prefix, which
 	 * Vaadin does not resolve for a runtime {@code Image} {@code src}).

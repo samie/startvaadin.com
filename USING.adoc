@@ -159,6 +159,22 @@ If you copy/paste the link above in your browser, you'll end up on start.spring.
 the usual UI except that the `Group` field is not equal to the usual `com.example`
 default.
 
+To link directly to a UI template, use `/template/<id>` with one of `helloworld`, `crud`,
+`dashboard` or `mobile`. Each template card on the site also has a link icon that copies
+this URL. The link selects the template and adds its dependencies:
+
+[source]
+----
+https://pro.startvaadin.com/template/crud
+----
+
+To combine a template with other settings, use `exampleId` in the `#!` form instead:
+
+[source]
+----
+https://pro.startvaadin.com/#!exampleId=dashboard&artifactId=metrics&javaVersion=25
+----
+
 NOTE: Any value that is not specified in the link will use whatever default is applicable
 once the link is used. If you want to enforce certain values, make sure they are part of
 the link.

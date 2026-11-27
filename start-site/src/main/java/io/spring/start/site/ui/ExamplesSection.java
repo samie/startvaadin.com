@@ -9,9 +9,14 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.card.Card;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import io.spring.start.site.ui.examples.Example;
@@ -63,10 +68,29 @@ public class ExamplesSection extends VerticalLayout {
 		card.setMedia(shot);
 		card.setTitle(example.title());
 		card.setSubtitle(example.description());
+		card.setHeaderSuffix(copyLinkButton(example));
 		card.setAriaRole("button");
 		card.getElement().setAttribute("tabindex", "0");
 		card.getElement().addEventListener("click", (event) -> choose(example));
 		return card;
+	}
+
+	private Button copyLinkButton(Example example) {
+		Button button = new Button(new Icon(VaadinIcon.LINK));
+		button.addThemeVariants(ButtonVariant.TERTIARY, ButtonVariant.SMALL);
+		String label = "Copy link to " + example.title();
+		button.setAriaLabel(label);
+		button.setTooltipText(label);
+		button.addClassName("example-card-link");
+		// A DOM listener (not a ClickListener) so the click can stop propagating:
+		// otherwise
+		// the card's own click listener would also toggle the selection.
+		button.getElement().addEventListener("click", (event) -> {
+			button.getElement()
+				.executeJs("navigator.clipboard.writeText(window.location.origin + $0)", example.linkPath());
+			Notification.show("Link to " + example.title() + " copied");
+		}).stopPropagation();
+		return button;
 	}
 
 	private void choose(Example example) {

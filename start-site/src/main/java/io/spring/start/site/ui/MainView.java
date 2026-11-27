@@ -137,9 +137,9 @@ public class MainView extends AppLayout {
 		if (!ShareUrlCodec.decodeInto(hash, this.model)) {
 			return;
 		}
-		this.binder.readBean(this.model);
-		this.dependenciesSection.refresh();
-		this.examplesSection.select(this.model.getExampleId());
+		// Route the template through applyExample so a link carrying only exampleId still
+		// gets the template's dependencies; an unknown id clears the selection.
+		applyExample(ExampleCatalog.find(this.model.getExampleId()));
 		getElement().executeJs("history.replaceState(null, '', window.location.pathname);");
 	}
 

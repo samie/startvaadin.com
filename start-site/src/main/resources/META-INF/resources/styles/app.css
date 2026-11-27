@@ -337,6 +337,27 @@
 .example-card {
 	flex: 0 0 12rem;
 	cursor: pointer;
+	position: relative;
+}
+
+/* Copy-link button: a small circle floating fully inside the screenshot's top-right
+   corner (card padding + a margin), so it does not narrow the title/description column. */
+.example-card-link {
+	position: absolute;
+	top: 1.25rem;
+	right: 1.25rem;
+	z-index: 1;
+	width: 1.6rem;
+	height: 1.6rem;
+	min-width: 0;
+	padding: 0;
+	background: var(--aura-surface-color, Canvas);
+	border-radius: 50%;
+}
+
+.example-card-link vaadin-icon {
+	width: 0.8rem;
+	height: 0.8rem;
 }
 
 .example-card[aria-pressed="true"] {

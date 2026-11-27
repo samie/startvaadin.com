@@ -20,6 +20,7 @@ import io.spring.start.site.ui.ArrivalStatisticsInitListener;
 import io.spring.start.site.ui.InitializrUiService;
 import io.spring.start.site.ui.Preferences;
 import io.spring.start.site.ui.SocialMetaInitListener;
+import io.spring.start.site.ui.examples.TemplateLinkController;
 import io.spring.start.site.web.RootForwardingFilter;
 import tools.jackson.databind.json.JsonMapper;
 
@@ -85,6 +86,11 @@ public class StartApplication {
 			io.spring.initializr.metadata.InitializrMetadataProvider metadataProvider,
 			ApplicationContext applicationContext) {
 		return new InitializrUiService(metadataProvider, applicationContext);
+	}
+
+	@Bean
+	public TemplateLinkController templateLinkController() {
+		return new TemplateLinkController();
 	}
 
 	@Bean
