@@ -49,15 +49,7 @@ public class ExploreDialog extends Dialog {
 		// Show a hint before anything is selected, and whenever a directory is selected
 		// (directories carry no content) rather than leaving the pane blank (gh #6).
 		this.fileContent.setText(PLACEHOLDER);
-		this.fileContent.getStyle()
-			.set("margin", "0")
-			.set("overflow", "auto")
-			.set("white-space", "pre")
-			.set("font-family", "var(--lumo-font-family-monospace, monospace)")
-			.set("font-size", "0.85rem")
-			.set("padding", "var(--lumo-space-m)")
-			.set("background", "var(--lumo-contrast-5pct)")
-			.set("height", "100%");
+		this.fileContent.addClassName("explore-file-content");
 		VerticalLayout right = new VerticalLayout(this.fileContent);
 		right.setPadding(false);
 		right.setSpacing(false);

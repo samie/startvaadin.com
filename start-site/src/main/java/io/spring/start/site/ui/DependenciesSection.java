@@ -46,10 +46,10 @@ public class DependenciesSection extends VerticalLayout {
 		setWidthFull();
 		add(new H2("Project dependencies"));
 		this.addButton = new Button("Add dependencies...", new Icon(VaadinIcon.PLUS), (event) -> openPicker());
-		this.addButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+		this.addButton.addThemeVariants(ButtonVariant.PRIMARY);
 		add(this.addButton);
 		this.emptyState = new Paragraph("No dependency selected.");
-		this.emptyState.getStyle().set("color", "var(--lumo-secondary-text-color)");
+		this.emptyState.addClassName("muted-text");
 		this.chipList = new VerticalLayout();
 		this.chipList.setPadding(false);
 		this.chipList.setSpacing(true);
@@ -99,9 +99,8 @@ public class DependenciesSection extends VerticalLayout {
 		Span title = new Span(name);
 		title.getStyle().set("font-weight", "600");
 		Span detail = new Span(invalid ? invalidMessage : ((description != null) ? description : ""));
-		detail.getStyle()
-			.set("color", invalid ? "var(--lumo-error-text-color)" : "var(--lumo-secondary-text-color)")
-			.set("font-size", "var(--lumo-font-size-s)");
+		detail.addClassName("dependency-detail");
+		detail.setClassName("invalid", invalid);
 		HorizontalLayout header = new HorizontalLayout(title);
 		header.setWidthFull();
 		header.setAlignItems(FlexComponent.Alignment.CENTER);
@@ -110,19 +109,14 @@ public class DependenciesSection extends VerticalLayout {
 		text.setPadding(false);
 		text.setSpacing(false);
 		Button remove = new Button(new Icon(VaadinIcon.CLOSE), (event) -> toggle(id));
-		remove.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE, ButtonVariant.LUMO_SMALL);
+		remove.addThemeVariants(ButtonVariant.TERTIARY, ButtonVariant.SMALL);
 		remove.setAriaLabel("Remove " + name);
 		remove.setTooltipText("Remove " + name);
 		HorizontalLayout chip = new HorizontalLayout(icon, text, remove);
 		chip.setWidthFull();
 		chip.setAlignItems(FlexComponent.Alignment.CENTER);
-		chip.getStyle()
-			.set("padding", "var(--lumo-space-s) var(--lumo-space-m)")
-			.set("background", "var(--lumo-contrast-5pct)")
-			.set("border-radius", "var(--lumo-border-radius-m)");
-		if (invalid) {
-			chip.getStyle().set("opacity", "0.6");
-		}
+		chip.addClassName("dependency-chip");
+		chip.setClassName("invalid", invalid);
 		text.getStyle().set("flex-grow", "1");
 		return chip;
 	}

@@ -54,7 +54,7 @@ public class HistoryDialog extends Dialog {
 		body.setSizeFull();
 		if (entries.isEmpty()) {
 			Paragraph empty = new Paragraph("Generated projects will appear here.");
-			empty.getStyle().set("color", "var(--lumo-secondary-text-color)");
+			empty.addClassName("muted-text");
 			body.add(empty);
 		}
 		else {
@@ -77,7 +77,7 @@ public class HistoryDialog extends Dialog {
 			this.onClearAll.run();
 			close();
 		});
-		clear.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+		clear.addThemeVariants(ButtonVariant.TERTIARY);
 		clear.setEnabled(!entries.isEmpty());
 		getFooter().add(clear, close);
 	}
@@ -87,12 +87,12 @@ public class HistoryDialog extends Dialog {
 			this.onLoad.accept(entry);
 			close();
 		});
-		load.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE, ButtonVariant.LUMO_SMALL);
+		load.addThemeVariants(ButtonVariant.TERTIARY, ButtonVariant.SMALL);
 		Button remove = new Button(new Icon(VaadinIcon.TRASH), (event) -> {
 			this.onDelete.accept(entry);
 			close();
 		});
-		remove.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE, ButtonVariant.LUMO_SMALL);
+		remove.addThemeVariants(ButtonVariant.TERTIARY, ButtonVariant.SMALL);
 		return new HorizontalLayout(load, remove);
 	}
 

@@ -45,7 +45,7 @@ public class FavoritesDialog extends Dialog {
 		body.setSizeFull();
 		if (entries.isEmpty()) {
 			Paragraph empty = new Paragraph("Bookmark a configuration to save it here.");
-			empty.getStyle().set("color", "var(--lumo-secondary-text-color)");
+			empty.addClassName("muted-text");
 			body.add(empty);
 		}
 		else {
@@ -69,12 +69,12 @@ public class FavoritesDialog extends Dialog {
 			this.onLoad.accept(entry);
 			close();
 		});
-		load.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE, ButtonVariant.LUMO_SMALL);
+		load.addThemeVariants(ButtonVariant.TERTIARY, ButtonVariant.SMALL);
 		Button remove = new Button(new Icon(VaadinIcon.TRASH), (event) -> {
 			this.onDelete.accept(entry);
 			close();
 		});
-		remove.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE, ButtonVariant.LUMO_SMALL);
+		remove.addThemeVariants(ButtonVariant.TERTIARY, ButtonVariant.SMALL);
 		return new HorizontalLayout(load, remove);
 	}
 

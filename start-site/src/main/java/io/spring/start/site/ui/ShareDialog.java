@@ -32,13 +32,14 @@ public class ShareDialog extends Dialog {
 		this.urlField.setReadOnly(true);
 		this.urlField.setValue(fragment);
 		Paragraph hint = new Paragraph("Share this URL — anyone opening it will land on this form pre-populated.");
-		hint.getStyle().set("color", "var(--lumo-secondary-text-color)").set("margin-top", "0");
+		hint.addClassName("muted-text");
+		hint.getStyle().set("margin-top", "0");
 		VerticalLayout body = new VerticalLayout(hint, this.urlField);
 		body.setPadding(false);
 		body.setSpacing(true);
 		add(body);
 		Button copy = new Button("Copy", (event) -> copyToClipboard());
-		copy.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+		copy.addThemeVariants(ButtonVariant.PRIMARY);
 		Button close = new Button("Close", (event) -> close());
 		getFooter().add(close, copy);
 		addOpenedChangeListener((event) -> {

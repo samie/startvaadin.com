@@ -147,7 +147,7 @@ public class DependencyPickerDialog extends Dialog {
 			// resetting to the full catalog (gh #2).
 			refresh(this.search.getValue());
 		});
-		add.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE, ButtonVariant.LUMO_SMALL);
+		add.addThemeVariants(ButtonVariant.TERTIARY, ButtonVariant.SMALL);
 		add.setEnabled(valid);
 		HorizontalLayout content = new HorizontalLayout(icon, text, add);
 		content.addClassName("aura-surface");

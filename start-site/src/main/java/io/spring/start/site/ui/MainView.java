@@ -91,7 +91,7 @@ public class MainView extends AppLayout {
 		this.actionsBar = new ActionsBar(this.service, this.model);
 		// Dark-first initial state; applyTheme reconciles with any saved preference.
 		this.themeToggle = new Button(new Icon(VaadinIcon.SUN), (event) -> toggleTheme());
-		this.themeToggle.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
+		this.themeToggle.addThemeVariants(ButtonVariant.TERTIARY);
 		this.themeToggle.setAriaLabel("Switch to light mode");
 		this.themeToggle.setTooltipText("Switch to light mode");
 		this.formSection.onBootVersionChange(this.dependenciesSection::refresh);
@@ -194,7 +194,7 @@ public class MainView extends AppLayout {
 			dialog.close();
 			Notification.show("Saved to favorites");
 		});
-		save.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+		save.addThemeVariants(ButtonVariant.PRIMARY);
 		dialog.getFooter().add(cancel, save);
 		dialog.open();
 	}
@@ -260,20 +260,20 @@ public class MainView extends AppLayout {
 	private void buildDrawer() {
 		Button tutorial = new Button("Tutorial", new Icon(VaadinIcon.ACADEMY_CAP),
 				(event) -> getUI().ifPresent((ui) -> ui.getPage().open(this.tutorialUrl, "_blank")));
-		tutorial.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+		tutorial.addThemeVariants(ButtonVariant.TERTIARY);
 		Button history = new Button("History", new Icon(VaadinIcon.CLOCK), (event) -> openHistoryDialog());
-		history.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+		history.addThemeVariants(ButtonVariant.TERTIARY);
 		Button favorites = new Button("Favorites", new Icon(VaadinIcon.STAR), (event) -> openFavoritesDialog());
-		favorites.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+		favorites.addThemeVariants(ButtonVariant.TERTIARY);
 		Button statistics = new Button("Statistics", new Icon(VaadinIcon.CHART),
 				(event) -> getUI().ifPresent((ui) -> ui.navigate(StatisticsView.class)));
-		statistics.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+		statistics.addThemeVariants(ButtonVariant.TERTIARY);
 		SvgIcon githubIcon = new SvgIcon("/assets/vendor-icons/icons/github.svg");
 		githubIcon.addClassName("dependency-icon");
-		githubIcon.getStyle().set("--vaadin-icon-size", "var(--lumo-icon-size-m, 24px)");
+		githubIcon.addClassName("drawer-icon");
 		Button repository = new Button("GitHub repo", githubIcon,
 				(event) -> getUI().ifPresent((ui) -> ui.getPage().open(Branding.REPOSITORY_URL, "_blank")));
-		repository.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+		repository.addThemeVariants(ButtonVariant.TERTIARY);
 		VerticalLayout drawer = new VerticalLayout(tutorial, history, favorites, statistics);
 		drawer.setPadding(true);
 		drawer.setSpacing(true);

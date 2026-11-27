@@ -2,7 +2,11 @@
  * Project styles for the start.spring.io Vaadin UI, layered on top of the Aura
  * theme. Served as a classpath static resource (META-INF/resources) and loaded
  * via @StyleSheet on AppShell, the same way the Aura stylesheet is delivered.
+ * Aura tokens only: no Lumo properties (Aura doesn't define them, so they resolve
+ * to nothing) and no fixed colours outside the brand token layer below.
  */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100..800&display=swap');
 
 /*
  * Brand token layer: a Vaadin-brand "professional developer tool" visual
@@ -19,16 +23,15 @@
 	   auto-derived button text white and AA-legible. */
 	--aura-accent-color-light: #056ff0;
 	--aura-accent-color-dark: #056ff0;
-	--lumo-primary-color: #056ff0;
 
 	/* Canvas — near-black dark, off-blue light (brand). Panels lift from here. */
 	--aura-background-color-dark: #0f0f0f;
 	--aura-background-color-light: #f0f4f7;
 
-	/* Typography — Inter-first system stack (no bundled font asset). */
-	--aura-font-family: Inter, -apple-system, "Segoe UI", Roboto, system-ui, sans-serif;
-	--lumo-font-family: var(--aura-font-family);
-	--mono: "JetBrains Mono", ui-monospace, "SF Mono", "Cascadia Code", "Noto Sans Mono", Consolas, monospace;
+	/* Typography — Inter for the UI, JetBrains Mono for technical values (both
+	   loaded by the @import rules above), Aura's system stack as the fallback. */
+	--aura-font-family: 'Inter', var(--aura-font-family-system);
+	--mono: 'JetBrains Mono', ui-monospace, "SF Mono", "Cascadia Code", Consolas, monospace;
 
 	/* Technical, tighter geometry. */
 	--aura-base-radius: 2;
@@ -72,7 +75,7 @@
 	padding: 0.15em 0.45em;
 	border-radius: 0.4em;
 	background: var(--aura-accent-color);
-	color: #fff;
+	color: var(--aura-accent-contrast-color);
 	font-family: var(--aura-font-family);
 	font-size: 0.5em;
 	font-weight: 700;
@@ -86,7 +89,7 @@
  */
 .app-tagline {
 	align-self: center;
-	margin-left: var(--lumo-space-m);
+	margin-inline-start: var(--vaadin-gap-m, 1rem);
 	font-size: 0.8125rem;
 	color: var(--vaadin-text-color-secondary);
 }
@@ -137,7 +140,7 @@
 	height: 100%;
 	width: 100%;
 	box-sizing: border-box;
-	gap: var(--lumo-space-s);
+	gap: var(--vaadin-gap-s, 0.5rem);
 }
 
 /* Panes fill the row height; min-height/min-width:0 let them shrink so their
@@ -337,7 +340,7 @@
 }
 
 .example-card[aria-pressed="true"] {
-	outline: 2px solid var(--lumo-primary-color);
+	outline: 2px solid var(--aura-accent-color);
 	outline-offset: -2px;
 }
 
@@ -361,7 +364,7 @@
 .dependency-icon {
 	--vaadin-icon-size: 36px;
 	flex-shrink: 0;
-	color: var(--lumo-secondary-text-color);
+	color: var(--vaadin-text-color-secondary);
 }
 
 /* Catalog group of a dependency ("Developer Tools", "Vaadin Add-ons"), at the end of its
@@ -369,4 +372,51 @@
 .source-badge {
 	margin-inline-start: auto;
 	flex-shrink: 0;
+}
+
+/* Secondary, explanatory text: empty states and dialog hints. */
+.muted-text {
+	color: var(--vaadin-text-color-secondary);
+}
+
+/* A selected dependency in the main view: a tinted surface row; dimmed when the
+   chosen Spring Boot version doesn't support it. */
+.dependency-chip {
+	padding: var(--vaadin-padding-s, 0.5rem) var(--vaadin-padding-m, 0.75rem);
+	background: var(--aura-surface-color);
+	border-radius: var(--vaadin-radius-m);
+}
+
+.dependency-chip.invalid {
+	opacity: 0.6;
+}
+
+.dependency-detail {
+	font-size: var(--aura-font-size-s);
+	color: var(--vaadin-text-color-secondary);
+}
+
+.dependency-detail.invalid {
+	color: var(--aura-red-text);
+}
+
+/* GitHub icon in the drawer, sized like the button's other icons rather than the
+   larger dependency icons it shares a class with. */
+.drawer-icon {
+	--vaadin-icon-size: 1.5rem;
+}
+
+/* File preview in the Explore dialog. */
+.explore-file-content {
+	box-sizing: border-box;
+	margin: 0;
+	width: 100%;
+	height: 100%;
+	overflow: auto;
+	padding: var(--vaadin-padding-m, 0.75rem);
+	background: var(--aura-surface-color);
+	border-radius: var(--vaadin-radius-m);
+	font-family: var(--mono);
+	font-size: var(--aura-font-size-s);
+	white-space: pre;
 }

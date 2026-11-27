@@ -50,10 +50,10 @@ public class ActionsBar extends HorizontalLayout {
 		setSpacing(true);
 		setAlignItems(FlexComponent.Alignment.CENTER);
 		this.generate = new Button("Generate", (event) -> generate());
-		this.generate.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+		this.generate.addThemeVariants(ButtonVariant.PRIMARY);
 		this.explore = new Button("Explore", (event) -> explore());
 		this.more = new MenuBar();
-		this.more.addThemeVariants(MenuBarVariant.LUMO_TERTIARY);
+		this.more.addThemeVariants(MenuBarVariant.TERTIARY);
 		var menu = this.more.addItem("More");
 		menu.getSubMenu().addItem("Share", (event) -> this.onShare.run());
 		menu.getSubMenu().addItem("Bookmark", (event) -> this.onBookmark.run());
@@ -101,12 +101,12 @@ public class ActionsBar extends HorizontalLayout {
 			UI.getCurrent().add(download);
 			download.getElement().executeJs("this.click(); setTimeout(() => this.remove(), 1000);");
 			Notification success = Notification.show("Downloading " + filename + "…");
-			success.addThemeVariants(com.vaadin.flow.component.notification.NotificationVariant.LUMO_SUCCESS);
+			success.addThemeVariants(com.vaadin.flow.component.notification.NotificationVariant.SUCCESS);
 			this.afterGenerate.run();
 		}
 		catch (RuntimeException ex) {
 			Notification.show("Generate failed: " + ex.getMessage())
-				.addThemeVariants(com.vaadin.flow.component.notification.NotificationVariant.LUMO_ERROR);
+				.addThemeVariants(com.vaadin.flow.component.notification.NotificationVariant.ERROR);
 		}
 	}
 
@@ -117,7 +117,7 @@ public class ActionsBar extends HorizontalLayout {
 		}
 		catch (RuntimeException ex) {
 			Notification.show("Explore failed: " + ex.getMessage())
-				.addThemeVariants(com.vaadin.flow.component.notification.NotificationVariant.LUMO_ERROR);
+				.addThemeVariants(com.vaadin.flow.component.notification.NotificationVariant.ERROR);
 		}
 	}
 
