@@ -145,6 +145,13 @@ class InitializrUiServiceTests {
 	}
 
 	@Test
+	void dashboardExampleAddsSvgVisualizations() {
+		InitializrFormModel model = this.service.defaultFormModel();
+		model.setExampleId("dashboard");
+		assertThat(pomOf(this.service.explore(model))).contains("<artifactId>svg-visualizations</artifactId>");
+	}
+
+	@Test
 	void mobileExampleReplacesTheGeneratedAppShellWithItsPwaOne() {
 		InitializrFormModel model = this.service.defaultFormModel();
 		model.setExampleId("mobile");

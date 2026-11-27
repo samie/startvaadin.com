@@ -18,7 +18,9 @@ public final class ExampleCatalog {
 			new Example("helloworld", "Hello World", "A view with a text field and a button.", List.of()),
 			new Example("crud", "CRUD App", "Grid and validated editor backed by JPA and an in-memory database.",
 					List.of("data-jpa", "h2", "validation")),
-			new Example("dashboard", "Dashboard", "Stat cards and progress bars on a responsive layout.", List.of()),
+			new Example("dashboard", "JVM Dashboard",
+					"Live JVM metrics delivered with Push, with trend charts and status gauges.",
+					List.of("svg-visualizations")),
 			new Example("mobile", "Mobile App",
 					"Bottom tabs, drill-down views and push notifications, installable as a PWA.",
 					List.of("vaadin-webpush")));
