@@ -1,0 +1,10 @@
+.contact-placeholder {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 100%;
+	margin: 0;
+	padding: var(--vaadin-padding-l, 1.5rem);
+	text-align: center;
+	color: var(--vaadin-text-color-secondary);
+}

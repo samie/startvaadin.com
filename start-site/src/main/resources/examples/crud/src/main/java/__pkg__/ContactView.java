@@ -1,20 +1,18 @@
 package {{package}};
 
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.masterdetaillayout.MasterDetailLayout;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.data.binder.BeanValidationBinder;
-import com.vaadin.flow.data.binder.RequiredFieldConfigurator;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import jakarta.validation.constraints.NotBlank;
+import org.springframework.data.domain.Sort;
 
 @Route("")
 @PageTitle("Contacts")
@@ -22,76 +20,82 @@ public class ContactView extends VerticalLayout {
 
 	private final ContactRepository repository;
 
-	private final Grid<Contact> grid = new Grid<>(Contact.class);
+	private final Grid<Contact> grid = new Grid<>();
 
-	private final TextField firstName = new TextField("First name");
+	private final MasterDetailLayout layout = new MasterDetailLayout();
 
-	private final TextField lastName = new TextField("Last name");
-
-	private final TextField email = new TextField("Email");
-
-	private final BeanValidationBinder<Contact> binder = new BeanValidationBinder<>(Contact.class);
-
-	private final Button delete = new Button("Delete", event -> delete());
-
-	private Contact editing = new Contact();
+	private final ContactEditor editor = new ContactEditor(this::save, this::delete, this::close);
 
 	public ContactView(ContactRepository repository) {
 		this.repository = repository;
 		setSizeFull();
 
+		Button add = new Button("New contact", VaadinIcon.PLUS.create(), event -> {
+			this.grid.asSingleSelect().clear();
+			edit(new Contact());
+		});
 		HorizontalLayout header = new HorizontalLayout(Alignment.CENTER, new H1("Contacts"));
 		header.setWidthFull();
 		header.addToEnd(new ColorSchemeSelect());
 
-		this.grid.setColumns("firstName", "lastName", "email");
-		this.grid.asSingleSelect().addValueChangeListener(event -> edit(event.getValue()));
+		this.grid.addColumn(contact -> contact.getFirstName() + " " + contact.getLastName())
+			.setHeader("Name")
+			.setComparator(Contact::getFirstName);
+		this.grid.addColumn(Contact::getEmail).setHeader("Email").setComparator(Contact::getEmail);
+		this.grid.setHeightFull();
+		this.grid.setEmptyStateText("No contacts yet. Add one with New contact.");
+		this.grid.asSingleSelect().addValueChangeListener(event -> {
+			if (event.getValue() != null) {
+				edit(event.getValue());
+			}
+			else {
+				this.layout.setDetail(null);
+			}
+		});
 
-		// @NotBlank is not among the constraints that mark a field as required by default
-		this.binder.setRequiredConfigurator(
-				RequiredFieldConfigurator.DEFAULT.chain((constraint, binding) -> constraint instanceof NotBlank));
-		this.binder.bindInstanceFields(this);
+		Paragraph placeholder = new Paragraph("Select a contact to edit it, or add a new one.");
+		placeholder.addClassName("contact-placeholder");
 
-		FormLayout form = new FormLayout();
-		form.setAutoResponsive(true);
-		form.setExpandColumns(true);
-		form.setExpandFields(true);
-		form.addFormRow(this.firstName, this.lastName);
-		form.addFormRow(this.email);
+		this.layout.setMaster(this.grid);
+		this.layout.setWidthFull();
+		this.layout.setExpandMaster(true);
+		this.layout.setDetailSize("26rem");
+		this.layout.setOverlaySize("100%");
+		this.layout.setDetailPlaceholder(placeholder);
+		this.layout.addBackdropClickListener(event -> close());
+		this.layout.addDetailEscapePressListener(event -> close());
 
-		Button save = new Button("Save", event -> save());
-		save.addThemeVariants(ButtonVariant.PRIMARY);
-
-		add(header, this.grid, form, new HorizontalLayout(save, this.delete));
-		expand(this.grid);
+		add(header, add, this.layout);
+		expand(this.layout);
 		refresh();
-		edit(new Contact());
 	}
 
 	private void edit(Contact contact) {
-		this.editing = (contact != null) ? contact : new Contact();
-		this.binder.readBean(this.editing);
-		this.delete.setEnabled(this.editing.getId() != null);
+		this.editor.edit(contact);
+		this.layout.setDetail(this.editor);
 	}
 
-	private void save() {
-		if (this.binder.writeBeanIfValid(this.editing)) {
-			this.repository.save(this.editing);
-			Notification.show("Contact saved");
-			refresh();
-			edit(new Contact());
-		}
+	private void close() {
+		this.grid.asSingleSelect().clear();
+		this.layout.setDetail(null);
 	}
 
-	private void delete() {
-		this.repository.delete(this.editing);
+	private void save(Contact contact) {
+		this.repository.save(contact);
+		Notification.show("Contact saved");
+		refresh();
+		close();
+	}
+
+	private void delete(Contact contact) {
+		this.repository.delete(contact);
 		Notification.show("Contact deleted");
 		refresh();
-		edit(new Contact());
+		close();
 	}
 
 	private void refresh() {
-		this.grid.setItems(this.repository.findAll());
+		this.grid.setItems(this.repository.findAll(Sort.by("firstName", "lastName")));
 	}
 
 }

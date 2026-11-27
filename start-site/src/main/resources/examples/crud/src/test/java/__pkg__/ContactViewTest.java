@@ -42,9 +42,10 @@ class ContactViewTest {
 
 	@Test
 	void userAddsANewContact() {
-		this.window.findTextField().withLabel("First name").setValue("Jane");
-		this.window.findTextField().withLabel("Last name").setValue("Roe");
-		this.window.findTextField().withLabel("Email").setValue("jane@example.com");
+		this.window.findButton().withText("New contact").click();
+		assertEquals("New contact", editorTitle());
+
+		fillIn("Jane", "Roe", "jane@example.com");
 		this.window.findButton().withText("Save").click();
 
 		assertEquals("Contact saved", this.window.findNotification().getText());
@@ -54,9 +55,8 @@ class ContactViewTest {
 
 	@Test
 	void userCannotSaveAContactWithAnInvalidEmail() {
-		this.window.findTextField().withLabel("First name").setValue("Jane");
-		this.window.findTextField().withLabel("Last name").setValue("Roe");
-		this.window.findTextField().withLabel("Email").setValue("jane.example.com");
+		this.window.findButton().withText("New contact").click();
+		fillIn("Jane", "Roe", "jane.example.com");
 		this.window.findButton().withText("Save").click();
 
 		assertTrue(this.window.findTextField().withLabel("Email").component().isInvalid());
@@ -67,10 +67,23 @@ class ContactViewTest {
 	@Test
 	void userChangesTheEmailOfAContact() {
 		this.window.findGrid(Contact.class).select(0);
+		assertEquals("John Doe", editorTitle());
+
 		this.window.findTextField().withLabel("Email").setValue("john.doe@example.com");
 		this.window.findButton().withText("Save").click();
 
+		assertEquals("Contact saved", this.window.findNotification().getText());
 		assertEquals("john.doe@example.com", this.repository.findAll().get(0).getEmail());
+	}
+
+	@Test
+	void userWhoCancelsLeavesTheContactUnchanged() {
+		this.window.findGrid(Contact.class).select(0);
+		this.window.findTextField().withLabel("Email").setValue("john.doe@example.com");
+		this.window.findButton().withText("Cancel").click();
+
+		assertFalse(this.window.findTextField().withLabel("Email").exists());
+		assertEquals("john@example.com", this.repository.findAll().get(0).getEmail());
 	}
 
 	@Test
@@ -84,12 +97,22 @@ class ContactViewTest {
 	}
 
 	@Test
-	void userCanDeleteOnlyAfterSelectingAContact() {
-		assertFalse(this.window.findButton().withText("Delete").component().isEnabled());
+	void userCanDeleteOnlyASavedContact() {
+		this.window.findButton().withText("New contact").click();
+		assertFalse(this.window.findButton().withText("Delete").exists());
 
 		this.window.findGrid(Contact.class).select(0);
+		assertTrue(this.window.findButton().withText("Delete").exists());
+	}
 
-		assertTrue(this.window.findButton().withText("Delete").component().isEnabled());
+	private String editorTitle() {
+		return this.window.findH2().getText();
+	}
+
+	private void fillIn(String firstName, String lastName, String email) {
+		this.window.findTextField().withLabel("First name").setValue(firstName);
+		this.window.findTextField().withLabel("Last name").setValue(lastName);
+		this.window.findTextField().withLabel("Email").setValue(email);
 	}
 
 	private void givenContact(String firstName, String lastName, String email) {
